@@ -25,6 +25,48 @@ const router = createRouter({
           component: () => import('@/views/dashboard/DashboardView.vue'),
           meta: { requiresAuth: true, roles: ['ADMIN'], title: '工作台' },
         },
+        {
+          path: 'houses',
+          name: 'house-list',
+          component: () => import('@/views/house/HouseListView.vue'),
+          meta: { requiresAuth: true, roles: ['ADMIN'], title: '房源管理' },
+        },
+        {
+          path: 'houses/new',
+          name: 'house-create',
+          component: () => import('@/views/house/HouseFormView.vue'),
+          meta: { requiresAuth: true, roles: ['ADMIN'], title: '新建房源' },
+        },
+        {
+          path: 'houses/:id',
+          name: 'house-detail',
+          component: () => import('@/views/house/HouseDetailView.vue'),
+          meta: { requiresAuth: true, roles: ['ADMIN'], title: '房源详情' },
+        },
+        {
+          path: 'houses/:id/edit',
+          name: 'house-edit',
+          component: () => import('@/views/house/HouseFormView.vue'),
+          meta: { requiresAuth: true, roles: ['ADMIN'], title: '编辑房源' },
+        },
+        {
+          path: 'owners',
+          name: 'owner-list',
+          component: () => import('@/views/owner/OwnerListView.vue'),
+          meta: { requiresAuth: true, roles: ['ADMIN'], title: '客源管理' },
+        },
+        {
+          path: 'owners/new',
+          name: 'owner-create',
+          component: () => import('@/views/owner/OwnerFormView.vue'),
+          meta: { requiresAuth: true, roles: ['ADMIN'], title: '新建房东/客源' },
+        },
+        {
+          path: 'owners/:id/edit',
+          name: 'owner-edit',
+          component: () => import('@/views/owner/OwnerFormView.vue'),
+          meta: { requiresAuth: true, roles: ['ADMIN'], title: '编辑房东/客源' },
+        },
       ],
     },
     {

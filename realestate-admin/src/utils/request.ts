@@ -163,4 +163,22 @@ export async function post<T>(url: string, body?: unknown, config?: AxiosRequest
   return res.data.data as T
 }
 
+export async function patch<T>(url: string, body?: unknown, config?: AxiosRequestConfig): Promise<T> {
+  const res = await request.patch<ApiResponse<T>>(url, body, config)
+  return res.data.data as T
+}
+
+export async function del<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
+  const res = await request.delete<ApiResponse<T>>(url, config)
+  return res.data.data as T
+}
+
+/** multipart 上传：Content-Type 由浏览器自动生成（带 boundary） */
+export async function upload<T>(url: string, file: File): Promise<T> {
+  const form = new FormData()
+  form.append('file', file)
+  const res = await request.post<ApiResponse<T>>(url, form)
+  return res.data.data as T
+}
+
 export default request

@@ -1,4 +1,5 @@
-const env = require('./env')
+// W2 修复：W1 误写为 require('./env')，实际配置文件位于 config/env.js，导致小程序端模块解析失败
+const env = require('../config/env')
 
 const REFRESH_TOKEN_KEY = 'rt'
 const USER_KEY = 'user'

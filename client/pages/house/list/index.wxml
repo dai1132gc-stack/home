@@ -1,0 +1,45 @@
+<!--pages/house/list/index.wxml-->
+<navigation-bar title="房源" back="{{true}}" color="black" background="#FFF"></navigation-bar>
+
+<view class="page">
+  <view class="tabs">
+    <view class="tab {{tab === 'all' ? 'active' : ''}}" data-tab="all" bindtap="switchTab">全部房源</view>
+    <view class="tab {{tab === 'fav' ? 'active' : ''}}" data-tab="fav" bindtap="switchTab">我的收藏</view>
+  </view>
+
+  <view class="filters" wx:if="{{tab === 'all'}}">
+    <view class="chip {{houseType === '' ? 'on' : ''}}" data-type="" bindtap="onTypeChange">全部</view>
+    <view class="chip {{houseType === 'RENT' ? 'on' : ''}}" data-type="RENT" bindtap="onTypeChange">出租</view>
+    <view class="chip {{houseType === 'SALE' ? 'on' : ''}}" data-type="SALE" bindtap="onTypeChange">出售</view>
+    <view class="sort" bindtap="onSortChange">{{sort === 'created_desc' ? '最新发布' : '价格最低'}} ⇅</view>
+  </view>
+
+  <scroll-view class="list" scroll-y type="list" bindscrolltolower="onScrollToLower" lower-threshold="120">
+    <view wx:if="{{error}}" class="empty">
+      <text>{{error}}</text>
+      <button class="retry" size="mini" bindtap="goLogin" wx:if="{{tab === 'fav'}}">去登录</button>
+    </view>
+
+    <view wx:elif="{{items.length === 0 && !loading}}" class="empty">
+      <text>{{tab === 'fav' ? '还没有收藏的房源' : '暂无房源'}}</text>
+    </view>
+
+    <view class="card" wx:for="{{items}}" wx:key="id" data-id="{{item.id}}" bindtap="goDetail">
+      <image class="cover" src="{{item.cover}}" mode="aspectFill" wx:if="{{item.cover}}" />
+      <view class="cover placeholder" wx:else>暂无图片</view>
+      <view class="info">
+        <view class="title">{{item.title}}</view>
+        <view class="meta">{{item.region}} · {{item.community}}</view>
+        <view class="meta">{{item.layoutText}} · {{item.areaText}}</view>
+        <view class="bottom">
+          <text class="price">{{item.priceText}}</text>
+          <text class="tag">{{item.typeText}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="loading" wx:if="{{loading}}">加载中…</view>
+    <view class="loading" wx:elif="{{finished && items.length > 0}}">没有更多了</view>
+    <view class="footer-space"></view>
+  </scroll-view>
+</view>

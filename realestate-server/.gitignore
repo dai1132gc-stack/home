@@ -7,3 +7,4 @@ target/
 .vscode/
 logs/
 .env
+uploads/

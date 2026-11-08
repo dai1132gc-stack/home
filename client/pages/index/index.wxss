@@ -22,7 +22,10 @@ page {
 .subtitle {
   font-size: 26rpx;
   color: #888;
-  margin-bottom: 80rpx;
+  margin-bottom: 60rpx;
+}
+.house-entry {
+  margin-bottom: 40rpx;
 }
 .status {
   font-size: 30rpx;

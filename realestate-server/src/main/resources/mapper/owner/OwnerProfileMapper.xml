@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.realestate.modules.owner.mapper.OwnerProfileMapper">
+
+    <sql id="queryWhere">
+        WHERE o.deleted = 0
+        <if test="q.nameKeyword != null and q.nameKeyword != ''">
+            AND o.name LIKE CONCAT(#{q.nameKeyword}, '%')
+        </if>
+        <if test="q.phoneKeyword != null and q.phoneKeyword != ''">
+            AND o.phone LIKE CONCAT(#{q.phoneKeyword}, '%')
+        </if>
+        <if test="q.type != null and q.type != ''">
+            AND o.type = #{q.type}
+        </if>
+    </sql>
+
+    <select id="selectPageList" resultType="com.example.realestate.modules.owner.model.entity.OwnerProfile">
+        SELECT o.id, o.name, o.phone, o.type, o.remark, o.created_by, o.version, o.deleted,
+               o.created_at, o.updated_at
+        FROM owner_profile o
+        <include refid="queryWhere"/>
+        ORDER BY o.created_at DESC, o.id DESC
+        LIMIT #{offset}, #{size}
+    </select>
+
+    <select id="countByQuery" resultType="long">
+        SELECT COUNT(*)
+        FROM owner_profile o
+        <include refid="queryWhere"/>
+    </select>
+
+</mapper>

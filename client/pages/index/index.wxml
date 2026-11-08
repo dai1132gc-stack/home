@@ -5,6 +5,8 @@
     <view class="title">房产中介管理系统</view>
     <view class="subtitle">小程序端 · 客户</view>
 
+    <button class="btn house-entry" type="primary" data-tab="all" bindtap="goHouses">浏览房源</button>
+
     <view wx:if="{{loading}}" class="status">正在恢复会话…</view>
 
     <block wx:elif="{{loggedIn}}">
@@ -12,6 +14,7 @@
         <text>已登录：{{user.nickname || user.username}}</text>
       </view>
       <view class="role">角色：{{user.role}}</view>
+      <button class="btn" data-tab="fav" bindtap="goHouses">我的收藏</button>
       <button class="btn" bindtap="goProfile" type="primary">进入个人中心</button>
     </block>
 

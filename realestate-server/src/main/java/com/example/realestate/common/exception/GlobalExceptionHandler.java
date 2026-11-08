@@ -14,9 +14,12 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
@@ -57,6 +60,20 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ApiResponse<Void>> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
         return build(ErrorCode.BAD_REQUEST, null);
+    }
+
+    /** 缺少必填参数 / 上传文件缺失 → 400（避免落到 500 兜底） */
+    @ExceptionHandler({MissingServletRequestParameterException.class, MissingServletRequestPartException.class})
+    public ResponseEntity<ApiResponse<Void>> handleMissingParam(Exception ex) {
+        log.warn("Missing request parameter: {}", ex.getMessage());
+        return build(ErrorCode.BAD_REQUEST, null);
+    }
+
+    /** 上传文件超出容器限制 → 413 */
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMaxUpload(MaxUploadSizeExceededException ex) {
+        log.warn("Upload size exceeded: {}", ex.getMessage());
+        return build(ErrorCode.FILE_TOO_LARGE, null);
     }
 
     /** 未认证 / 令牌无效 → 401（统一提示，不区分令牌缺失与过期细节之外的内部原因） */

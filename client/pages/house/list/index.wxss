@@ -1,0 +1,140 @@
+/**pages/house/list/index.wxss**/
+page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #f5f6f8;
+}
+.page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.tabs {
+  display: flex;
+  background: #fff;
+  padding: 0 24rpx;
+}
+.tab {
+  flex: 1;
+  text-align: center;
+  padding: 24rpx 0;
+  font-size: 30rpx;
+  color: #666;
+  border-bottom: 4rpx solid transparent;
+}
+.tab.active {
+  color: #2b6de5;
+  font-weight: 600;
+  border-bottom-color: #2b6de5;
+}
+.filters {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 20rpx 24rpx;
+  background: #fff;
+  border-top: 1rpx solid #f0f0f0;
+}
+.chip {
+  padding: 10rpx 28rpx;
+  border-radius: 999rpx;
+  background: #f2f4f7;
+  color: #555;
+  font-size: 26rpx;
+}
+.chip.on {
+  background: #e8f0fe;
+  color: #2b6de5;
+  font-weight: 600;
+}
+.sort {
+  margin-left: auto;
+  font-size: 24rpx;
+  color: #888;
+}
+.list {
+  flex: 1;
+  height: 0;
+  padding: 20rpx 24rpx 0;
+  box-sizing: border-box;
+}
+.card {
+  display: flex;
+  background: #fff;
+  border-radius: 20rpx;
+  overflow: hidden;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
+}
+.cover {
+  width: 240rpx;
+  height: 180rpx;
+  flex-shrink: 0;
+  background: #eef1f5;
+}
+.cover.placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #aab0b8;
+  font-size: 24rpx;
+}
+.info {
+  flex: 1;
+  padding: 18rpx 20rpx;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1f2329;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.meta {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: #7b828c;
+}
+.bottom {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.price {
+  color: #e64340;
+  font-size: 32rpx;
+  font-weight: 700;
+}
+.tag {
+  font-size: 22rpx;
+  color: #2b6de5;
+  background: #eef4ff;
+  padding: 4rpx 14rpx;
+  border-radius: 8rpx;
+}
+.empty {
+  padding: 120rpx 0;
+  text-align: center;
+  color: #8a9099;
+  font-size: 28rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24rpx;
+}
+.loading {
+  text-align: center;
+  color: #9aa0a8;
+  font-size: 24rpx;
+  padding: 20rpx 0;
+}
+.footer-space {
+  height: 40rpx;
+}

@@ -40,4 +40,10 @@ Page({
   goProfile() {
     wx.navigateTo({ url: '/pages/profile/profile' })
   },
+
+  /** 房源列表：游客可浏览；tab=fav 需要登录，未登录由列表页跳登录 */
+  goHouses(e) {
+    const tab = (e && e.currentTarget && e.currentTarget.dataset.tab) || 'all'
+    wx.navigateTo({ url: '/pages/house/list/index?tab=' + tab })
+  },
 })

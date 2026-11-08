@@ -17,7 +17,15 @@ public enum ErrorCode {
     REFRESH_REPLAY("AUTH_40104", 401, "检测到刷新令牌重放，会话已撤销"),
     FORBIDDEN("AUTH_40301", 403, "无权访问该资源"),
     VALIDATION_FAILED("COMMON_42201", 422, "字段校验失败"),
-    NOT_FOUND("COMMON_40401", 404, "资源不存在");
+    NOT_FOUND("COMMON_40401", 404, "资源不存在"),
+
+    // 业务状态
+    CONFLICT("COMMON_40901", 409, "当前状态不允许该操作"),
+    DUPLICATE("COMMON_40902", 409, "数据已存在，请勿重复提交"),
+
+    // 文件
+    FILE_INVALID("FILE_40001", 400, "文件类型或内容不合法"),
+    FILE_TOO_LARGE("FILE_41301", 413, "文件大小超出限制");
 
     private final String code;
     private final int httpStatus;

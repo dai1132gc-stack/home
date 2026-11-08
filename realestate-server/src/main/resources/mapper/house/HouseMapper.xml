@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.realestate.modules.house.mapper.HouseMapper">
+
+    <!-- 条件全部参数化；forcedStatus 由 Service 依据角色注入（非 ADMIN 强制 PUBLISHED） -->
+    <sql id="queryWhere">
+        WHERE h.deleted = 0
+        <if test="forcedStatus != null and forcedStatus != ''">
+            AND h.status = #{forcedStatus}
+        </if>
+        <if test="q.status != null and q.status != ''">
+            AND h.status = #{q.status}
+        </if>
+        <if test="q.houseType != null and q.houseType != ''">
+            AND h.house_type = #{q.houseType}
+        </if>
+        <if test="q.region != null and q.region != ''">
+            AND h.region LIKE CONCAT(#{q.region}, '%')
+        </if>
+        <if test="q.minPrice != null">
+            AND h.price &gt;= #{q.minPrice}
+        </if>
+        <if test="q.maxPrice != null">
+            AND h.price &lt;= #{q.maxPrice}
+        </if>
+        <if test="q.minArea != null">
+            AND h.area &gt;= #{q.minArea}
+        </if>
+        <if test="q.maxArea != null">
+            AND h.area &lt;= #{q.maxArea}
+        </if>
+        <if test="q.keyword != null and q.keyword != ''">
+            AND (h.title LIKE CONCAT(#{q.keyword}, '%') OR h.community LIKE CONCAT(#{q.keyword}, '%'))
+        </if>
+    </sql>
+
+    <select id="selectPageList" resultType="com.example.realestate.modules.house.model.vo.HouseListItemVO">
+        SELECT h.id, h.title, h.house_type, h.status, h.community, h.region,
+               h.price, h.area, h.rooms, h.bathrooms, h.floor, h.owner_id, h.created_at
+        FROM house h
+        <include refid="queryWhere"/>
+        <choose>
+            <when test="q.sort == 'price_asc'">ORDER BY h.price ASC, h.id DESC</when>
+            <when test="q.sort == 'price_desc'">ORDER BY h.price DESC, h.id DESC</when>
+            <when test="q.sort == 'area_asc'">ORDER BY h.area ASC, h.id DESC</when>
+            <when test="q.sort == 'area_desc'">ORDER BY h.area DESC, h.id DESC</when>
+            <otherwise>ORDER BY h.created_at DESC, h.id DESC</otherwise>
+        </choose>
+        LIMIT #{offset}, #{size}
+    </select>
+
+    <select id="countByQuery" resultType="long">
+        SELECT COUNT(*)
+        FROM house h
+        <include refid="queryWhere"/>
+    </select>
+
+</mapper>

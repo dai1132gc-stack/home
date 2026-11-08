@@ -2,7 +2,9 @@
   "pages": [
     "pages/index/index",
     "pages/login/login",
-    "pages/profile/profile"
+    "pages/profile/profile",
+    "pages/house/list/index",
+    "pages/house/detail/index"
   ],
   "window": {
     "navigationBarTextStyle": "black",

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.realestate.modules.house.mapper.HouseFavoriteMapper">
+
+    <!-- 只返回仍然 PUBLISHED 的房源；下架/删除的房源不进入收藏列表 -->
+    <select id="selectFavoritePage" resultType="com.example.realestate.modules.house.model.vo.FavoriteVO">
+        SELECT h.id AS house_id,
+               h.title,
+               h.house_type,
+               h.region,
+               h.price,
+               h.area,
+               h.rooms,
+               f.created_at AS favorited_at
+        FROM house_favorite f
+        JOIN house h ON h.id = f.house_id AND h.deleted = 0 AND h.status = 'PUBLISHED'
+        WHERE f.user_id = #{userId}
+        ORDER BY f.created_at DESC, f.id DESC
+        LIMIT #{offset}, #{size}
+    </select>
+
+    <select id="countFavorites" resultType="long">
+        SELECT COUNT(*)
+        FROM house_favorite f
+        JOIN house h ON h.id = f.house_id AND h.deleted = 0 AND h.status = 'PUBLISHED'
+        WHERE f.user_id = #{userId}
+    </select>
+
+</mapper>

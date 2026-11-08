@@ -33,3 +33,17 @@ export interface LoginRequest {
   password: string
   clientType: 'WEB' | 'MINI'
 }
+
+/** 统一分页响应（后端 PageResponse） */
+export interface PageResult<T> {
+  items: T[]
+  total: number
+  page: number
+  size: number
+}
+
+/** 分页请求参数 */
+export interface PageParams {
+  page?: number
+  size?: number
+}

@@ -1,0 +1,63 @@
+<!--pages/house/detail/index.wxml-->
+<navigation-bar title="房源详情" back="{{true}}" color="black" background="#FFF"></navigation-bar>
+
+<view class="page">
+  <view wx:if="{{loading}}" class="state">加载中…</view>
+  <view wx:elif="{{error}}" class="state">
+    <text>{{error}}</text>
+    <button size="mini" class="retry" bindtap="goBack">返回</button>
+  </view>
+
+  <block wx:else>
+    <scroll-view class="body" scroll-y type="list">
+      <swiper wx:if="{{images.length}}" class="gallery" indicator-dots circular indicator-color="rgba(255,255,255,.5)" indicator-active-color="#fff">
+        <swiper-item wx:for="{{images}}" wx:key="*this">
+          <image class="gallery-img" src="{{item}}" mode="aspectFill" data-url="{{item}}" bindtap="previewImage" />
+        </swiper-item>
+      </swiper>
+      <view wx:else class="gallery placeholder">暂无图片</view>
+
+      <view class="panel">
+        <view class="headline">
+          <text class="price">{{priceText}}</text>
+          <text class="badge">{{typeText}}</text>
+        </view>
+        <view class="title">{{house.title}}</view>
+        <view class="meta">{{house.region}} · {{house.community}}</view>
+        <view class="meta">{{house.address}}</view>
+      </view>
+
+      <view class="panel">
+        <view class="section-title">房源信息</view>
+        <view class="grid">
+          <view class="cell">
+            <text class="cell-value">{{house.rooms}} 室 {{house.bathrooms}} 卫</text>
+            <text class="cell-label">户型</text>
+          </view>
+          <view class="cell">
+            <text class="cell-value">{{house.area}} ㎡</text>
+            <text class="cell-label">面积</text>
+          </view>
+          <view class="cell">
+            <text class="cell-value">{{house.floor || '-'}}</text>
+            <text class="cell-label">楼层</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="panel">
+        <view class="section-title">房源描述</view>
+        <view class="desc">{{house.description || '暂无描述'}}</view>
+      </view>
+
+      <view class="tip">房源信息由中介维护，看房请联系经纪人</view>
+      <view class="footer-space"></view>
+    </scroll-view>
+
+    <view class="actions">
+      <button class="fav {{favorited ? 'on' : ''}}" loading="{{favoriting}}" bindtap="toggleFavorite">
+        {{favorited ? '已收藏' : '收藏'}}
+      </button>
+    </view>
+  </block>
+</view>
