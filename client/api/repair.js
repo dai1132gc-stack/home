@@ -1,5 +1,5 @@
 const { env, getAccessToken } = require('../store/auth')
-const { get, post, refreshAccessToken } = require('../utils/request')
+const { get, post, refreshAccessToken, networkError } = require('../utils/request')
 
 /** 报修：提交、我的列表、详情、状态操作与私有图片上传/下载 */
 
@@ -45,6 +45,7 @@ function uploadRepairImage(ticketId, filePath, retried) {
         Authorization: 'Bearer ' + getAccessToken(),
         'X-Request-Id': genTraceId(),
       },
+      timeout: 60000,
       success(res) {
         let body = {}
         try {
@@ -58,6 +59,10 @@ function uploadRepairImage(ticketId, filePath, retried) {
             .catch(reject)
           return
         }
+        if (res.statusCode === 401) {
+          reject(new Error('登录已过期，请重新登录'))
+          return
+        }
         if (res.statusCode >= 400 || body.code !== '0') {
           reject(new Error(body.message || '图片上传失败（' + res.statusCode + '）'))
           return
@@ -65,7 +70,7 @@ function uploadRepairImage(ticketId, filePath, retried) {
         resolve(body.data)
       },
       fail(err) {
-        reject(new Error((err && err.errMsg) || '网络异常，图片上传失败'))
+        reject(networkError(err))
       },
     })
   })
@@ -77,11 +82,16 @@ function downloadRepairImage(ticketId, mediaId, retried) {
     wx.downloadFile({
       url: env.apiBaseUrl + '/repairs/' + ticketId + '/media/' + mediaId,
       header: { Authorization: 'Bearer ' + getAccessToken() },
+      timeout: 30000,
       success(res) {
         if (res.statusCode === 401 && !retried) {
           refreshAccessToken()
             .then(() => downloadRepairImage(ticketId, mediaId, true).then(resolve, reject))
             .catch(reject)
+          return
+        }
+        if (res.statusCode === 401) {
+          reject(new Error('登录已过期，请重新登录'))
           return
         }
         if (res.statusCode !== 200) {
@@ -91,7 +101,7 @@ function downloadRepairImage(ticketId, mediaId, retried) {
         resolve(res.tempFilePath)
       },
       fail(err) {
-        reject(new Error((err && err.errMsg) || '网络异常，图片加载失败'))
+        reject(networkError(err))
       },
     })
   })

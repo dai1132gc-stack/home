@@ -33,6 +33,9 @@
   color: #aaa;
   padding: 80rpx 0;
 }
+.retry {
+  margin-top: 24rpx;
+}
 .logout {
   width: 100%;
 }

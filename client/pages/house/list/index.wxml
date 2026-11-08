@@ -17,6 +17,7 @@
   <scroll-view class="list" scroll-y type="list" bindscrolltolower="onScrollToLower" lower-threshold="120">
     <view wx:if="{{error}}" class="empty">
       <text>{{error}}</text>
+      <button class="retry" size="mini" bindtap="retry">重试</button>
       <button class="retry" size="mini" bindtap="goLogin" wx:if="{{tab === 'fav'}}">去登录</button>
     </view>
 

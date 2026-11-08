@@ -15,7 +15,10 @@ public enum ErrorCode {
     TOKEN_INVALID("AUTH_40102", 401, "令牌无效或已过期"),
     LOGIN_FAILED("AUTH_40103", 401, "用户名或密码错误"),
     REFRESH_REPLAY("AUTH_40104", 401, "检测到刷新令牌重放，会话已撤销"),
+    WECHAT_CODE_INVALID("AUTH_40105", 401, "微信登录凭证无效或已过期，请重新登录"),
     FORBIDDEN("AUTH_40301", 403, "无权访问该资源"),
+    WECHAT_UPSTREAM_ERROR("AUTH_50201", 502, "微信服务暂时不可用，请稍后重试"),
+    WECHAT_NOT_CONFIGURED("AUTH_50301", 503, "微信登录未配置，请使用账号密码登录"),
     VALIDATION_FAILED("COMMON_42201", 422, "字段校验失败"),
     NOT_FOUND("COMMON_40401", 404, "资源不存在"),
 

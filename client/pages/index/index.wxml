@@ -30,7 +30,7 @@
 
     <block wx:else>
       <view class="status">未登录</view>
-      <button class="btn" bindtap="goLogin" type="primary">账号密码登录</button>
+      <button class="btn" bindtap="goLogin" type="primary">登录 / 微信一键登录</button>
     </block>
   </view>
 </scroll-view>

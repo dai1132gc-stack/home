@@ -48,6 +48,10 @@ Page({
       })
   },
 
+  retry() {
+    this.load()
+  },
+
   goBack() {
     wx.navigateBack({ delta: 1 })
   },

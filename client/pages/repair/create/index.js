@@ -101,6 +101,10 @@ Page({
       })
   },
 
+  retry() {
+    this.loadSource()
+  },
+
   onCategoryChange(e) {
     this.setData({ categoryIndex: Number(e.detail.value) })
   },

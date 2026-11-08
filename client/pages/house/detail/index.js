@@ -52,6 +52,10 @@ Page({
       })
   },
 
+  retry() {
+    this.load()
+  },
+
   previewImage(e) {
     const current = e.currentTarget.dataset.url
     if (!current) return

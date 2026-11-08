@@ -2,12 +2,13 @@
 
 ## 当前状态
 
-- 当前技术方案版本：**V5.0**（W4 租后服务与工具已完成并通过端到端验收；W1 见方案第 21 节，W2 第 22 节，W3 第 23 节，W4 第 24 节）。
+- 当前技术方案版本：**V6.0**（W5 小程序联调已完成并通过端到端验收；W1 见方案第 21 节，W2 第 22 节，W3 第 23 节，W4 第 24 节，W5 第 25 节）。
 - 完整方案：[`技术方案.md`](../技术方案.md)。
 - W1 已交付三端工程：后端 `realestate-server`（Spring Boot 3.5.6 + JWT + Redis 会话）、Web `realestate-admin`（Vue 3 + TS）、小程序 `client`（原生，增量新增认证模块）。
 - W2 在此基础上新增：房源 CRUD 与状态机、条件筛选与排序（下推 SQL）、图片上传与媒体关联、房东/客源管理、客户收藏、数据权限隔离；Web 新增房源/客源页面，小程序新增房源列表/详情/收藏。
 - W3 新增：预约带看（客户提交、ADMIN 确认/取消/完成/爽约、客户取消）、合同（起草→待签→客户确认生效→终止，含房源/双方/条款快照）、交易节点（定金/签约/交房 + 状态日志）、中文合同 PDF（字体嵌入、金额大写、长地址换行、表格跨页、私有存储 + 鉴权下载）、房源状态扩展 `RESERVED/CONTRACTED` 并与预约/合同联动；Web 新增预约/合同页面，小程序新增预约看房/我的预约/我的合同。
 - W4 新增：报修工单（客户提交、ADMIN 受理/处理/解决、客户关闭/撤销/重开、状态时间线、私有图片鉴权预览）、内容政策（教程/网签指引/公告、政策文档、草稿/发布/下架、纯文本正文、政策 PDF 附件）、房贷与税费测算（商贷/公积金、等额本息/本金、税费分档、公开限流、配置来源与免责声明）、客源跟进（复用 V2 `customer_follow`）、合同到期定时任务（Redis 锁、幂等、释放房源）；Web 新增报修/内容/跟进/测算页面，小程序新增报修/内容/测算页面。
+- W5 新增：微信小程序 code 登录（`POST /auth/wechat-login` + `user_wechat_binding`，Flyway V5；未配置 AppID/AppSecret 返回 503 并降级账号密码，不信任客户端 openid、不保存 session_key）；小程序登录页微信一键登录与账号密码降级、401 单飞刷新、上传/下载显式 Bearer 与刷新重试、GET 重试/写请求不重试、私有图片预览、列表分页与错误重试、个人中心登录态修复；输出真机与合法域名清单。真实微信授权与真机扫码仍待正式凭据后由用户验证。
 - `home/client` 是用户已创建的原生微信小程序工程，W1～W4 均保留并增量修改，未迁移 uni-app。
 - 下文启动命令已随工程落地生效。
 - 所有项目源码、启动说明和项目内文档统一放在 `D:/graduate/home/`；总体技术方案保留在 `D:/graduate/技术方案.md`。
@@ -112,7 +113,7 @@ cp /d/graduate/home/client/config/env.example.js /d/graduate/home/client/config/
 | Web | `VITE_API_BASE_URL=http://localhost:8080/api/v1` |
 | 小程序 | `client/config/env.js` 中配置开发 API Base URL；测试号 AppID 已在 project.config.json |
 | 文件阶段 | 公开媒体目录 `STORAGE_LOCAL_ROOT`（默认 `uploads`）；合同 PDF 私有目录 `STORAGE_PRIVATE_ROOT`（默认 `uploads-private`，不注册静态映射）；生产再配置 OSS |
-| 正式微信联调阶段 | 后端正式 AppID/AppSecret；W1 测试号使用账号密码登录，不需要 AppSecret |
+| 微信登录（W5） | 后端 `WECHAT_MINI_APP_ID`、`WECHAT_MINI_APP_SECRET`、`WECHAT_MINI_TIMEOUT_SECONDS`（默认 4）；未配置时微信登录返回 503，账号密码登录不受影响 |
 | AI 阶段 | 后端 AI Base URL、模型、API Key、超时与限额 |
 
 注意：
@@ -143,7 +144,7 @@ mvn spring-boot:run -Dspring-boot.run.arguments="--server.port=8080"
 
 > 注意：本机环境下 `spring-boot:run` 的 `server.port` 可能被环境源注入为随机端口，必须通过 `-Dspring-boot.run.arguments="--server.port=8080"` 强制指定 8080（详见技术方案 21.6 已知限制）。
 
-首次启动由 Flyway 自动执行 `V1__init_auth.sql`、`V2__house_owner.sql`、`V3__appointment_contract.sql` 与 `V4__repair_content_calculator.sql` 建表，`BootstrapInitializer` 创建初始 `admin`/`customer` 账号（dev 默认密码 `Admin@123456`/`Customer@123456`，仅本地）。
+首次启动由 Flyway 自动执行 `V1__init_auth.sql`、`V2__house_owner.sql`、`V3__appointment_contract.sql`、`V4__repair_content_calculator.sql` 与 `V5__wechat_binding.sql` 建表，`BootstrapInitializer` 创建初始 `admin`/`customer` 账号（dev 默认密码 `Admin@123456`/`Customer@123456`，仅本地）。
 
 图片上传目录 `realestate-server/uploads/` 由 `LocalStorageService` 启动时自动创建（已加入 `.gitignore`），dev 下通过 `http://localhost:8080/uploads/...` 访问；生产用 `STORAGE_TYPE=oss` 切换对象存储（OSS 实现尚未接入，W4 私有文件仍落本地私有目录）。
 
@@ -174,13 +175,13 @@ http://localhost:5174
 原生小程序不需要执行 uni-app 构建命令。直接在微信开发者工具中：
 
 1. 打开已有工程 `D:/graduate/home/client`，不要重新创建、覆盖或迁移该目录。
-2. 沿用当前测试号 AppID；W1 通过客户账号密码登录并验证 JWT/Refresh Token，不依赖 code2session。
+2. 沿用当前测试号 AppID；W5 起登录页支持「微信一键登录」，未配置后端 `WECHAT_MINI_APP_ID`/`WECHAT_MINI_APP_SECRET` 时提示后使用账号密码登录。
 3. 确认 `client/config/env.js` 的开发 API Base URL 为 `http://localhost:8080/api/v1`，然后点击编译。
 4. 本地开发时按开发规范处理“不校验合法域名”选项；该选项只用于开发，不代表真机和生产可绕过域名要求。
 5. 验证账号密码登录、Token 刷新和本人数据页面。
 6. W2 已新增房源入口：首页「浏览房源」进入 `pages/house/list`，卡片支持出租/出售筛选与最新/价格排序；详情页 `pages/house/detail` 支持图片轮播与收藏（未登录点收藏会跳登录）。列表页「我的收藏」需要客户登录。
 7. W3 新增客户入口：房源详情底部「预约看房」→ `pages/appointment/create`（选日期/时间、填电话，未登录跳登录）；首页「我的预约」→ `pages/appointment/list`（可取消待确认/已确认预约）；首页「我的合同」→ `pages/contract/list`，详情页可确认签署并下载 PDF（`wx.downloadFile` + `wx.openDocument`）。
-8. 正式微信 code 登录待 AppID/AppSecret 可用后接入；W5 再进行真机预览、上传/下载合法域名与弱网测试。
+8. W5 新增登录方式：登录页「微信一键登录」（`wx.login` → `POST /auth/wechat-login`），失败时明确提示并保留账号密码登录；未配置 `WECHAT_MINI_APP_ID`/`WECHAT_MINI_APP_SECRET` 时后端返回 503，小程序提示“微信登录未配置，请使用账号密码”，不会伪造成功。真实微信授权与真机扫码需正式凭据，见 `docs/w5-device-checklist.md`。
 9. W4 新增客户入口：首页「租房指南/公告」进入 `pages/content/list`（按分类筛选）→ 详情纯文本渲染；「政策文件」进入政策列表；「房贷计算」进入 `pages/calculator/index`（房贷/税费）；登录后「我的报修」进入 `pages/repair/list`，可提交、撤销、确认完成、重新打开并查看私有图片；房源详情与 ACTIVE 合同详情提供「申请报修」入口。
 
 小程序 `wx.request` 不依赖浏览器 CORS，但后端接口认证、权限和 HTTPS 要求不变。
@@ -196,6 +197,7 @@ http://localhost:5174
 | Web | 左侧菜单「报修管理」 | 状态/分类/日期筛选；受理、开始处理、完成处理、关闭；详情抽屉含问题描述、私有图片预览与状态时间线 |
 | Web | 左侧菜单「内容管理」 | 教程与公告、政策文件两页；新建/编辑（纯文本 + 换行预览）/发布/下架/删除；政策附件上传与鉴权下载 |
 | Web | 左侧菜单「测算工具」 | 商业贷款/公积金、等额本息/本金、首付与利率、按年汇总、费率来源与免责声明；税费明细与分档规则 |
+| 小程序 | 首页「登录 / 微信一键登录」 | 微信 code 登录；未配置凭据时提示后使用账号密码降级；登录成功保留返回页面 |
 | 小程序 | 首页「浏览房源」 | 已发布房源卡片列表，支持出租/出售筛选与最新/价格排序 |
 | 小程序 | 房源详情页 | 图片轮播、价格与户型信息、收藏、预约看房、申请报修 |
 | 小程序 | 首页「我的收藏」 | 需客户登录；仅展示仍在架房源 |
@@ -259,11 +261,12 @@ npm run lint
 - Web lint、单测和构建通过。
 - 涉及小程序的阶段完成编译与关键页面冒烟。
 - 登录、Access Token 过期、Refresh Token 轮换、退出登录无循环刷新。
+- 微信登录未配置返回 503 且账号密码可用；不信任客户端 openid、不保存 session_key。
 - 客户不能读取他人合同、预约和报修。
 - 核心异常返回正确 HTTP 状态、统一响应和 traceId。
 - 请求日志不含密码、令牌、完整手机号或合同正文。
 
-### 5.5 W2/W3/W4 冒烟脚本（需后端、Web、Redis、MySQL 已启动）
+### 5.5 W2/W3/W4/W5 冒烟脚本（需后端、Web、Redis、MySQL 已启动）
 
 ```bash
 cd /d/graduate/home
@@ -284,7 +287,11 @@ node docs/web-w4-flow.mjs docs      # 报修/内容/政策/测算/客源跟进�
 # 3) 小程序页面逻辑（Node 模拟 wx，不含 GUI 渲染）
 node docs/mini-logic-smoke.mjs      # W2 浏览/收藏 + W3 预约/取消/合同确认/PDF 下载
 node docs/mini-w4-flow.mjs          # W4 报修提交/图片上传/流转、内容政策、房贷与税费测算
+node docs/mini-w5-flow.mjs          # W5 微信未配置降级/模拟成功、账号密码登录、401 单飞刷新、
+                                    #     弱网重试策略、上传下载鉴权、全流程页面与个人中心
 ```
+
+W5 真机与合法域名项无法自动化，清单与验收边界见 `docs/w5-device-checklist.md`；真实微信授权、jscode2session 与扫码项标注“待用户验证”，不得表述为真机通过。
 
 `smoke-w3.sh`/`smoke-w4.sh` 会创建隔离测试账号 `customer2`（复用 `customer` 密码哈希，仅本地 dev），并临时插入 2000 条样本做 EXPLAIN 后立即清理。W4 脚本会按 `W4冒烟%` 前缀清理数据库测试行；`uploads-private/` 下的测试图片文件不会自动删除，可按需手工清理。脚本仅限本地 dev，生产不得执行。
 
@@ -315,6 +322,11 @@ node docs/mini-w4-flow.mjs          # W4 报修提交/图片上传/流转、内�
 | 浏览器跨域但 Postman 正常 | Origin 是否明确允许、预检 OPTIONS、withCredentials 与 allowCredentials 是否匹配 |
 | 页面刷新后重复退出 | Web Access Token 应在内存，刷新 Cookie 是否正确发送；检查单飞刷新和重试次数 |
 | 小程序开发者工具可用、真机失败 | HTTPS 合法域名、AppID、Token Storage、上传/下载域名和网络权限 |
+| 微信登录返回 503 `AUTH_50301` | 后端 `.env` 是否配置 `WECHAT_MINI_APP_ID`/`WECHAT_MINI_APP_SECRET`，是否重启；未配置时属预期降级，用账号密码登录 |
+| 微信登录 401 `AUTH_40105` | code 一次性使用，已使用/过期需重新点击登录；不要复用同一 code |
+| 微信登录 502 `AUTH_50201` | 服务器到 `api.weixin.qq.com` 的网络/DNS/超时；接口不自动重试，稍后再试 |
+| 小程序上传/下载 401 | 请求是否显式带 Bearer；Access Token 过期应自动刷新并重试一次，仍失败回登录页 |
+| 真机请求全部超时、工具正常 | `apiBaseUrl` 不能是 `localhost`；手机与后端网络互通，使用 HTTPS 且配置合法域名 |
 | PDF 中文乱码或方块 | 字体是否嵌入（`resources/fonts/NotoSansSC-Regular.ttf`）、`OFL.txt` 是否随包；PDF 由服务端生成，浏览器字体不影响 |
 | 合同提交/确认报 409 | 该房源已有待签署或生效中的合同；先终止旧合同，或确认操作重复提交 |
 | 报修受理/关闭报 409 | 工单状态已被他人变更（重复受理、跳过处理直接关闭、已撤销后再操作）；刷新详情查看时间线 |
@@ -345,8 +357,8 @@ node docs/mini-w4-flow.mjs          # W4 报修提交/图片上传/流转、内�
 | W1 工程基座与认证 | V2.0 |
 | W2 房源与客源 | V3.0 |
 | W3 交易与合同 | V4.0 |
-| W4 租后服务与工具 | **V5.0（当前）** |
-| W5 小程序联调 | V6.0 |
+| W4 租后服务与工具 | **V5.0** |
+| W5 小程序联调 | **V6.0（当前）** |
 | W6 智能增强 | V7.0 |
 | W7 测试与优化 | V8.0 |
 | W8 部署与论文材料 | V9.0 |

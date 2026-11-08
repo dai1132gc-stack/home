@@ -33,13 +33,13 @@ class JwtTokenProviderTest {
         AppProperties properties = new AppProperties(
                 new AppProperties.Jwt(ACCESS_SECRET, "another-refresh-secret-0123456789abcdef01234567", 15, 7),
                 new AppProperties.Cors(ORIGINS),
-                new AppProperties.Bootstrap(null, null));
+                new AppProperties.Bootstrap(null, null), null);
         provider = new JwtTokenProvider(properties);
         // TTL 1 分钟的 provider，用于构造过期场景验证
         expiredProvider = new JwtTokenProvider(new AppProperties(
                 new AppProperties.Jwt(ACCESS_SECRET, "another-refresh-secret-0123456789abcdef01234567", 1, 7),
                 new AppProperties.Cors(ORIGINS),
-                new AppProperties.Bootstrap(null, null)));
+                new AppProperties.Bootstrap(null, null), null));
     }
 
     private LoginUser user() {
@@ -97,7 +97,7 @@ class JwtTokenProviderTest {
         AppProperties bad = new AppProperties(
                 new AppProperties.Jwt("short", "another-refresh-secret-0123456789abcdef01234567", 15, 7),
                 new AppProperties.Cors(ORIGINS),
-                new AppProperties.Bootstrap(null, null));
+                new AppProperties.Bootstrap(null, null), null);
         assertThatThrownBy(() -> new JwtTokenProvider(bad))
                 .isInstanceOf(IllegalStateException.class);
     }

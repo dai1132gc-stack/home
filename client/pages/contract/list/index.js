@@ -109,6 +109,10 @@ Page({
       })
   },
 
+  retry() {
+    this.load(true)
+  },
+
   goDetail(e) {
     const id = e.currentTarget.dataset.id
     wx.navigateTo({ url: '/pages/contract/detail/index?id=' + id })

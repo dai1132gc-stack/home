@@ -61,7 +61,8 @@ class AuthServiceImplTest {
                         "unit-test-refresh-secret-0123456789abcdef0123456789abcdef",
                         15, 7),
                 new AppProperties.Cors(List.of("http://localhost:5174")),
-                new AppProperties.Bootstrap(null, null));
+                new AppProperties.Bootstrap(null, null),
+                null);
 
         authService = new AuthServiceImpl(
                 sysUserMapper,
@@ -192,5 +193,52 @@ class AuthServiceImplTest {
         var vo = authService.me(new LoginUser(1L, "admin", "ADMIN", ClientType.WEB));
         assertThat(vo.username()).isEqualTo("admin");
         assertThat(vo.role()).isEqualTo("ADMIN");
+    }
+
+    @Test
+    @DisplayName("微信身份已校验：按 userId 签发 MINI 双令牌，审计记 LOGIN")
+    void externalAuthIssuesTokens() {
+        when(sysUserMapper.selectById(eq(2L))).thenReturn(customer);
+
+        LoginResponse response = authService.loginAfterExternalAuth(2L, ClientType.MINI);
+
+        assertThat(response.accessToken()).isNotBlank();
+        assertThat(response.refreshToken()).isNotBlank();
+        assertThat(response.user().role()).isEqualTo("CUSTOMER");
+        assertThat(response.expiresIn()).isEqualTo(15 * 60L);
+    }
+
+    @Test
+    @DisplayName("微信身份对应账号被禁用：统一 LOGIN_FAILED，不签发令牌")
+    void externalAuthRejectedWhenDisabled() {
+        customer.setStatus("DISABLED");
+        when(sysUserMapper.selectById(eq(2L))).thenReturn(customer);
+
+        assertThatThrownBy(() -> authService.loginAfterExternalAuth(2L, ClientType.MINI))
+                .isInstanceOf(BusinessException.class)
+                .extracting(ex -> ((BusinessException) ex).errorCode())
+                .isEqualTo(ErrorCode.LOGIN_FAILED);
+    }
+
+    @Test
+    @DisplayName("微信身份对应账号不存在：统一 LOGIN_FAILED")
+    void externalAuthRejectedWhenMissing() {
+        when(sysUserMapper.selectById(eq(99L))).thenReturn(null);
+
+        assertThatThrownBy(() -> authService.loginAfterExternalAuth(99L, ClientType.MINI))
+                .isInstanceOf(BusinessException.class)
+                .extracting(ex -> ((BusinessException) ex).errorCode())
+                .isEqualTo(ErrorCode.LOGIN_FAILED);
+    }
+
+    @Test
+    @DisplayName("微信身份角色与客户端不匹配：统一 LOGIN_FAILED")
+    void externalAuthRejectedWhenRoleMismatch() {
+        when(sysUserMapper.selectById(eq(1L))).thenReturn(admin);
+
+        assertThatThrownBy(() -> authService.loginAfterExternalAuth(1L, ClientType.MINI))
+                .isInstanceOf(BusinessException.class)
+                .extracting(ex -> ((BusinessException) ex).errorCode())
+                .isEqualTo(ErrorCode.LOGIN_FAILED);
     }
 }

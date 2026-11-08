@@ -8,7 +8,11 @@
       <view class="row"><text class="k">角色</text><text class="v">{{user.role}}</text></view>
       <view class="row"><text class="k">状态</text><text class="v">{{user.status}}</text></view>
     </view>
+    <view wx:elif="{{!loggedIn}}" class="empty">
+      <text>登录后查看个人资料</text>
+      <button size="mini" class="retry" bindtap="goLogin">去登录</button>
+    </view>
     <view wx:else class="empty">加载中…</view>
-    <button class="logout" type="warn" bindtap="handleLogout">退出登录</button>
+    <button wx:if="{{loggedIn}}" class="logout" type="warn" bindtap="handleLogout">退出登录</button>
   </view>
 </scroll-view>

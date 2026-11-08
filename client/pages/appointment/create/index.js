@@ -70,6 +70,10 @@ Page({
       })
   },
 
+  retry() {
+    this.loadHouse()
+  },
+
   onDateChange(e) {
     this.setData({ date: e.detail.value })
   },

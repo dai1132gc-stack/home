@@ -52,6 +52,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/v1/auth/login", "/api/v1/auth/refresh", "/api/v1/auth/logout").permitAll()
+                        // W5：微信 code 登录（未配置凭据时由 Service 返回 503，不绕过认证）
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/wechat-login").permitAll()
                         // W2：房源列表与详情对游客开放（Service 层强制只返回 PUBLISHED）；图片资源公开
                         .requestMatchers(HttpMethod.GET, "/api/v1/houses", "/api/v1/houses/*").permitAll()
                         // W4：教程/公告/政策公开只读（Service 强制 PUBLISHED）；测算公开但限流

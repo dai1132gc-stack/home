@@ -3,6 +3,18 @@
 <scroll-view class="scrollarea" scroll-y type="list">
   <view class="login-wrap">
     <view class="brand">房产中介 · 客户端</view>
+
+    <button
+      class="submit wechat"
+      type="primary"
+      loading="{{wechatLoading}}"
+      disabled="{{loading}}"
+      bindtap="handleWechatLogin"
+    >微信一键登录</button>
+    <view class="hint wechat-hint">使用微信身份快速登录；未配置 AppID/AppSecret 时请使用下方账号密码</view>
+
+    <view class="divider">或使用账号密码</view>
+
     <view class="field">
       <view class="label">用户名</view>
       <input class="input" value="{{username}}" bindinput="onUsernameInput" placeholder="请输入用户名" />
@@ -11,7 +23,7 @@
       <view class="label">密码</view>
       <input class="input" value="{{password}}" password bindinput="onPasswordInput" placeholder="请输入密码" />
     </view>
-    <button class="submit" type="primary" loading="{{loading}}" bindtap="handleLogin">登 录</button>
-    <view class="hint">W1 测试号阶段使用账号密码登录，微信 code 登录待正式 AppID 配置后启用</view>
+    <button class="submit" type="primary" loading="{{loading}}" disabled="{{wechatLoading}}" bindtap="handleLogin">登 录</button>
+    <view class="hint">账号密码登录为降级路径，微信登录需后端配置正式 AppID/AppSecret</view>
   </view>
 </scroll-view>

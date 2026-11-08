@@ -135,6 +135,10 @@ Page({
     })
   },
 
+  retry() {
+    this.load(true)
+  },
+
   goHouses() {
     wx.navigateTo({ url: '/pages/house/list/index' })
   },

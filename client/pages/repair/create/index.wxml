@@ -6,6 +6,7 @@
     <view wx:if="{{loading}}" class="state">加载中…</view>
     <view wx:elif="{{error}}" class="state">
       <text>{{error}}</text>
+      <button size="mini" class="retry" bindtap="retry">重试</button>
       <button size="mini" class="retry" bindtap="goBack">返回</button>
     </view>
 

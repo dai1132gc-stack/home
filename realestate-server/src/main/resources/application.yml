@@ -47,6 +47,12 @@ app:
   bootstrap:
     admin-password: ${BOOTSTRAP_ADMIN_PASSWORD:}
     customer-password: ${BOOTSTRAP_CUSTOMER_PASSWORD:}
+  wechat:
+    # W5 微信小程序 code 登录：未配置时 /auth/wechat-login 返回 503，账号密码登录保持可用
+    app-id: ${WECHAT_MINI_APP_ID:}
+    app-secret: ${WECHAT_MINI_APP_SECRET:}
+    timeout-seconds: ${WECHAT_MINI_TIMEOUT_SECONDS:4}
+    api-base-url: ${WECHAT_MINI_API_BASE_URL:https://api.weixin.qq.com}
   storage:
     type: ${STORAGE_TYPE:local}
     local-root: ${STORAGE_LOCAL_ROOT:uploads}

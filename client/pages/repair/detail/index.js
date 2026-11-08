@@ -77,6 +77,10 @@ Page({
       })
   },
 
+  retry() {
+    this.load()
+  },
+
   /** 私有图片：逐张带 Token 下载到临时文件，下载完成后再渲染 */
   loadImages(detail) {
     const mediaPaths = {}

@@ -20,6 +20,7 @@
 
     <view wx:elif="{{error}}" class="empty">
       <text>{{error}}</text>
+      <button size="mini" class="retry" bindtap="retry">重试</button>
     </view>
 
     <view wx:elif="{{items.length === 0 && !loading}}" class="empty">

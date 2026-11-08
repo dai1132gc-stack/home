@@ -30,6 +30,28 @@
 .submit {
   margin-top: 40rpx;
 }
+.wechat {
+  margin-top: 0;
+}
+.wechat-hint {
+  margin-top: 16rpx;
+}
+.divider {
+  margin: 56rpx 0 40rpx;
+  font-size: 24rpx;
+  color: #999;
+  text-align: center;
+}
+.divider::before,
+.divider::after {
+  content: '';
+  display: inline-block;
+  width: 80rpx;
+  height: 1rpx;
+  background: #e0e0e0;
+  vertical-align: middle;
+  margin: 0 16rpx;
+}
 .hint {
   margin-top: 48rpx;
   font-size: 24rpx;

@@ -74,6 +74,10 @@ Page({
       })
   },
 
+  retry() {
+    this.load()
+  },
+
   confirm() {
     if (this.data.acting) return
     const contract = this.data.contract

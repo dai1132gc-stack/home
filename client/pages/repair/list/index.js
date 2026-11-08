@@ -159,6 +159,10 @@ Page({
     })
   },
 
+  retry() {
+    this.load(true)
+  },
+
   goDetail(e) {
     const id = e.currentTarget.dataset.id
     if (!id) return

@@ -88,7 +88,30 @@ public class AuthServiceImpl implements AuthService {
         audit(user.getId(), request.username(), request.clientType(), EVENT_LOGIN, true, null);
         log.info("登录成功 userId={} role={} client={}", user.getId(), user.getRole(), request.clientType());
         return response;
-    }    @Override
+    }
+
+    @Override
+    public LoginResponse loginAfterExternalAuth(Long userId, ClientType client) {
+        SysUser user = sysUserMapper.selectById(userId);
+        if (user == null || !SysUser.STATUS_ACTIVE.equals(user.getStatus())) {
+            audit(user == null ? userId : user.getId(),
+                    user == null ? "wechat:" + userId : user.getUsername(),
+                    client, EVENT_LOGIN, false, user == null ? "USER_NOT_FOUND" : "DISABLED");
+            throw new BusinessException(ErrorCode.LOGIN_FAILED);
+        }
+        if (!roleMatchesClient(user.getRole(), client)) {
+            audit(user.getId(), user.getUsername(), client, EVENT_LOGIN, false, "ROLE_MISMATCH");
+            throw new BusinessException(ErrorCode.LOGIN_FAILED);
+        }
+        LoginUser loginUser = toLoginUser(user, client);
+        LoginResponse response = issueTokens(user, client, loginUser);
+        audit(user.getId(), user.getUsername(), client, EVENT_LOGIN, true, null);
+        log.info("登录成功 userId={} role={} client={} method=WECHAT",
+                user.getId(), user.getRole(), client);
+        return response;
+    }
+
+    @Override
     public LoginResponse refresh(String cookieToken, String bodyToken) {
         String presented = firstNonBlank(cookieToken, bodyToken);
         if (presented == null) {

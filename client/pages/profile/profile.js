@@ -6,13 +6,29 @@ Page({
   data: {
     user: null,
     loading: false,
+    loggedIn: false,
   },
 
   onLoad() {
+    const loggedIn = !!getAccessToken()
+    this.setData({ loggedIn })
     this.refreshView()
-    if (getAccessToken()) {
+    if (loggedIn) {
       this.fetchMe()
     }
+  },
+
+  onShow() {
+    const loggedIn = !!getAccessToken()
+    if (loggedIn !== this.data.loggedIn) {
+      this.setData({ loggedIn })
+      this.refreshView()
+      if (loggedIn) this.fetchMe()
+    }
+  },
+
+  goLogin() {
+    wx.navigateTo({ url: '/pages/login/login' })
   },
 
   refreshView() {
