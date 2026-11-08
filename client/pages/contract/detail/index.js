@@ -109,6 +109,12 @@ Page({
       })
   },
 
+  goRepair() {
+    const contract = this.data.contract
+    if (!contract) return
+    wx.navigateTo({ url: '/pages/repair/create/index?contractId=' + contract.id })
+  },
+
   goBack() {
     wx.navigateBack({ delta: 1 })
   },

@@ -2,6 +2,7 @@ package com.example.realestate.modules.file.service.impl;
 
 import com.example.realestate.common.enums.ErrorCode;
 import com.example.realestate.common.exception.BusinessException;
+import com.example.realestate.common.util.ImageHeaderDetector;
 import com.example.realestate.modules.file.config.StorageProperties;
 import com.example.realestate.modules.file.service.StorageService;
 import org.slf4j.Logger;
@@ -96,25 +97,14 @@ public class LocalStorageService implements StorageService {
 
     /** 依据文件头判断真实图片类型，客户端声明的 Content-Type 与扩展名一律不信任 */
     private String detectImageExtension(MultipartFile file) {
-        byte[] header = new byte[12];
-        int read;
+        String extension;
         try (InputStream in = file.getInputStream()) {
-            read = in.readNBytes(header, 0, header.length);
+            extension = ImageHeaderDetector.detectExtension(in);
         } catch (IOException e) {
             throw new BusinessException(ErrorCode.FILE_INVALID);
         }
-        if (read >= 3 && (header[0] & 0xFF) == 0xFF && (header[1] & 0xFF) == 0xD8 && (header[2] & 0xFF) == 0xFF) {
-            return "jpg";
-        }
-        if (read >= 8 && (header[0] & 0xFF) == 0x89 && header[1] == 'P' && header[2] == 'N' && header[3] == 'G') {
-            return "png";
-        }
-        if (read >= 6 && header[0] == 'G' && header[1] == 'I' && header[2] == 'F' && header[3] == '8') {
-            return "gif";
-        }
-        if (read >= 12 && header[0] == 'R' && header[1] == 'I' && header[2] == 'F' && header[3] == 'F'
-                && header[8] == 'W' && header[9] == 'E' && header[10] == 'B' && header[11] == 'P') {
-            return "webp";
+        if (extension != null) {
+            return extension;
         }
         String lower = file.getOriginalFilename() == null
                 ? "" : file.getOriginalFilename().toLowerCase(Locale.ROOT);

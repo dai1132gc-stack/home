@@ -1,0 +1,200 @@
+/**pages/calculator/index.wxss**/
+page {
+  background: #f5f6f8;
+}
+.scroll {
+  height: 100vh;
+}
+.page {
+  padding: 20rpx 24rpx 40rpx;
+}
+.note {
+  font-size: 22rpx;
+  color: #b26a00;
+  background: #fff7e8;
+  border-radius: 12rpx;
+  padding: 14rpx 18rpx;
+  margin-bottom: 16rpx;
+  line-height: 1.6;
+}
+.tabs {
+  display: flex;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 8rpx;
+  margin-bottom: 20rpx;
+}
+.tab {
+  flex: 1;
+  text-align: center;
+  font-size: 28rpx;
+  color: #6b7280;
+  padding: 14rpx 0;
+  border-radius: 12rpx;
+}
+.tab.active {
+  color: #2b6de5;
+  background: #eef4ff;
+  font-weight: 600;
+}
+.panel {
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 26rpx;
+  margin-bottom: 20rpx;
+}
+.form-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18rpx 0;
+  border-bottom: 1rpx solid #f2f3f5;
+}
+.form-item:last-child {
+  border-bottom: none;
+}
+.label {
+  font-size: 28rpx;
+  color: #4a515b;
+  min-width: 150rpx;
+}
+.value {
+  font-size: 28rpx;
+  color: #1f2329;
+}
+.input {
+  flex: 1;
+  text-align: right;
+  font-size: 28rpx;
+  color: #1f2329;
+}
+.hint {
+  font-size: 22rpx;
+  color: #9aa0a8;
+  line-height: 1.6;
+  padding-top: 10rpx;
+}
+.submit {
+  border-radius: 44rpx;
+  font-size: 30rpx;
+  background: #2b6de5;
+  color: #fff;
+  margin-bottom: 20rpx;
+}
+.result .stat-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14rpx;
+  margin-bottom: 16rpx;
+}
+.result .stat-grid .stat {
+  width: calc(50% - 7rpx);
+  box-sizing: border-box;
+  background: #f7f8fa;
+  border-radius: 14rpx;
+  padding: 18rpx;
+}
+.result .stat-grid.two .stat {
+  width: calc(50% - 7rpx);
+}
+.stat-label {
+  font-size: 22rpx;
+  color: #8a9099;
+}
+.stat-value {
+  margin-top: 8rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1f2329;
+}
+.stat-value.primary {
+  color: #e54d42;
+}
+.row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16rpx;
+  padding: 10rpx 0;
+  font-size: 25rpx;
+  color: #3d434b;
+  border-bottom: 1rpx solid #f7f8fa;
+}
+.row-label {
+  color: #8a9099;
+}
+.row-value {
+  flex: 1;
+  text-align: right;
+  color: #6b7280;
+  font-size: 23rpx;
+}
+.section-title {
+  margin: 20rpx 0 10rpx;
+  font-size: 27rpx;
+  font-weight: 600;
+  color: #1f2329;
+}
+.year-row {
+  display: flex;
+  gap: 6rpx;
+  padding: 8rpx 0;
+  border-bottom: 1rpx solid #f7f8fa;
+}
+.year-head {
+  font-weight: 600;
+  color: #6b7280;
+  background: #f7f8fa;
+}
+.year-cell {
+  flex: 1;
+  font-size: 21rpx;
+  color: #4a515b;
+  text-align: right;
+  overflow: hidden;
+}
+.year-cell:first-child {
+  text-align: left;
+  flex: 0 0 50rpx;
+}
+.assumption {
+  font-size: 23rpx;
+  color: #6b7280;
+  line-height: 1.8;
+}
+.disclaimer {
+  margin-top: 12rpx;
+  padding: 12rpx 16rpx;
+  border-radius: 12rpx;
+  background: #f7f8fa;
+  font-size: 21rpx;
+  color: #9aa0a8;
+  line-height: 1.6;
+}
+.tax-item {
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid #f2f3f5;
+}
+.tax-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.tax-name {
+  font-size: 27rpx;
+  font-weight: 600;
+  color: #1f2329;
+}
+.tax-amount {
+  font-size: 27rpx;
+  color: #e54d42;
+  font-weight: 600;
+}
+.tax-meta {
+  margin-top: 6rpx;
+  font-size: 22rpx;
+  color: #9aa0a8;
+  line-height: 1.6;
+}
+.footer-space {
+  height: 30rpx;
+}

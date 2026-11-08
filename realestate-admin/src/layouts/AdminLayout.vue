@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowDown, Calendar, Document, House, OfficeBuilding, User } from '@element-plus/icons-vue'
+import { ArrowDown, Calendar, Document, DocumentCopy, House, OfficeBuilding, Tools, TrendCharts, User } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
 
@@ -22,7 +22,7 @@ async function handleLogout(): Promise<void> {
         <el-icon :size="20"><House /></el-icon>
         <span>房产中介管理系统</span>
       </div>
-      <el-menu router :default-active="$route.path" class="menu">
+      <el-menu router :default-active="$route.path" :default-openeds="['/contents']" class="menu">
         <el-menu-item index="/dashboard">
           <el-icon><House /></el-icon>
           <span>工作台</span>
@@ -42,6 +42,22 @@ async function handleLogout(): Promise<void> {
         <el-menu-item index="/contracts">
           <el-icon><Document /></el-icon>
           <span>合同管理</span>
+        </el-menu-item>
+        <el-menu-item index="/repairs">
+          <el-icon><Tools /></el-icon>
+          <span>报修管理</span>
+        </el-menu-item>
+        <el-sub-menu index="/contents">
+          <template #title>
+            <el-icon><DocumentCopy /></el-icon>
+            <span>内容管理</span>
+          </template>
+          <el-menu-item index="/contents/guides">教程与公告</el-menu-item>
+          <el-menu-item index="/contents/policies">政策文件</el-menu-item>
+        </el-sub-menu>
+        <el-menu-item index="/calculator">
+          <el-icon><TrendCharts /></el-icon>
+          <span>测算工具</span>
         </el-menu-item>
       </el-menu>
     </el-aside>

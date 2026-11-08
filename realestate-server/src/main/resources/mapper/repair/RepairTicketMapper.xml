@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.realestate.modules.repair.mapper.RepairTicketMapper">
+
+    <sql id="listColumns">
+        r.id, r.ticket_no, r.house_id, r.contract_id, r.customer_id,
+        r.category, r.urgency, r.title, r.status, r.contact_phone,
+        r.preferred_visit_time, r.created_at, r.updated_at,
+        h.title AS house_title,
+        c.contract_no AS contract_no,
+        COALESCE(u.nickname, u.username) AS customer_name
+    </sql>
+
+    <!-- forcedCustomerId 由 Service 按角色注入；状态/分类/时间全部走索引前缀 -->
+    <sql id="queryWhere">
+        WHERE r.deleted = 0
+        <if test="forcedCustomerId != null">
+            AND r.customer_id = #{forcedCustomerId}
+        </if>
+        <if test="q.status != null and q.status != ''">
+            AND r.status = #{q.status}
+        </if>
+        <if test="q.category != null and q.category != ''">
+            AND r.category = #{q.category}
+        </if>
+        <if test="q.keyword != null and q.keyword != ''">
+            AND (r.ticket_no LIKE CONCAT(#{q.keyword}, '%') OR r.title LIKE CONCAT(#{q.keyword}, '%'))
+        </if>
+        <if test="q.fromTime != null">
+            AND r.created_at &gt;= #{q.fromTime}
+        </if>
+        <if test="q.toTime != null">
+            AND r.created_at &lt;= #{q.toTime}
+        </if>
+    </sql>
+
+    <select id="selectPageList" resultType="com.example.realestate.modules.repair.model.vo.RepairListRow">
+        SELECT <include refid="listColumns"/>
+        FROM repair_ticket r
+        LEFT JOIN house h ON h.id = r.house_id
+        LEFT JOIN contract c ON c.id = r.contract_id
+        LEFT JOIN sys_user u ON u.id = r.customer_id
+        <include refid="queryWhere"/>
+        ORDER BY r.created_at DESC, r.id DESC
+        LIMIT #{offset}, #{size}
+    </select>
+
+    <select id="countByQuery" resultType="long">
+        SELECT COUNT(*)
+        FROM repair_ticket r
+        <include refid="queryWhere"/>
+    </select>
+
+    <select id="selectDetailById" resultType="com.example.realestate.modules.repair.model.vo.RepairDetailRow">
+        SELECT r.id, r.ticket_no, r.house_id, r.contract_id, r.customer_id,
+               r.category, r.urgency, r.title, r.description, r.status,
+               r.contact_phone, r.preferred_visit_time, r.version,
+               r.created_at, r.updated_at,
+               h.title AS house_title, h.address AS house_address,
+               c.contract_no AS contract_no,
+               COALESCE(u.nickname, u.username) AS customer_name
+        FROM repair_ticket r
+        LEFT JOIN house h ON h.id = r.house_id
+        LEFT JOIN contract c ON c.id = r.contract_id
+        LEFT JOIN sys_user u ON u.id = r.customer_id
+        WHERE r.deleted = 0 AND r.id = #{id}
+    </select>
+
+    <update id="updateStatusIfMatch">
+        UPDATE repair_ticket
+        SET status = #{target}, version = version + 1, updated_at = #{now}
+        WHERE id = #{id} AND deleted = 0 AND status = #{expected}
+    </update>
+
+</mapper>

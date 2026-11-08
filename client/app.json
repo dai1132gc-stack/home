@@ -8,7 +8,13 @@
     "pages/appointment/create/index",
     "pages/appointment/list/index",
     "pages/contract/list/index",
-    "pages/contract/detail/index"
+    "pages/contract/detail/index",
+    "pages/repair/create/index",
+    "pages/repair/list/index",
+    "pages/repair/detail/index",
+    "pages/content/list/index",
+    "pages/content/detail/index",
+    "pages/calculator/index"
   ],
   "window": {
     "navigationBarTextStyle": "black",

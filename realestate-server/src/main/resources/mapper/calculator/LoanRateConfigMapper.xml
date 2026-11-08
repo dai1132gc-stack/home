@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.realestate.modules.calculator.mapper.LoanRateConfigMapper">
+
+    <sql id="columns">
+        id, loan_type, term_years, rate, effective_date, source, active, created_at
+    </sql>
+
+    <select id="selectActiveRates" resultType="com.example.realestate.modules.calculator.model.entity.LoanRateConfig">
+        SELECT <include refid="columns"/>
+        FROM loan_rate_config
+        WHERE active = 1 AND effective_date &lt;= #{today}
+        ORDER BY loan_type ASC, term_years ASC, effective_date DESC
+    </select>
+
+    <select id="selectLatestRate" resultType="com.example.realestate.modules.calculator.model.entity.LoanRateConfig">
+        SELECT <include refid="columns"/>
+        FROM loan_rate_config
+        WHERE loan_type = #{loanType}
+          AND term_years = #{termYears}
+          AND active = 1
+          AND effective_date &lt;= #{today}
+        ORDER BY effective_date DESC, id DESC
+        LIMIT 1
+    </select>
+
+</mapper>

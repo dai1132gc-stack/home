@@ -97,4 +97,15 @@ Page({
     }
     wx.navigateTo({ url: '/pages/appointment/create/index?id=' + this.data.id })
   },
+
+  goRepair() {
+    if (!getAccessToken()) {
+      wx.showToast({ title: '请先登录', icon: 'none' })
+      setTimeout(() => {
+        wx.navigateTo({ url: '/pages/login/login' })
+      }, 600)
+      return
+    }
+    wx.navigateTo({ url: '/pages/repair/create/index?houseId=' + this.data.id })
+  },
 })

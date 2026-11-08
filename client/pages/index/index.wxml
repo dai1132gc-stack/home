@@ -7,6 +7,13 @@
 
     <button class="btn house-entry" type="primary" data-tab="all" bindtap="goHouses">浏览房源</button>
 
+    <view class="entry-grid">
+      <button class="entry" bindtap="goGuides">租房指南</button>
+      <button class="entry" data-category="NOTICE" bindtap="goGuides">公告</button>
+      <button class="entry" bindtap="goPolicies">政策文件</button>
+      <button class="entry" bindtap="goCalculator">房贷计算</button>
+    </view>
+
     <view wx:if="{{loading}}" class="status">正在恢复会话…</view>
 
     <block wx:elif="{{loggedIn}}">
@@ -17,6 +24,7 @@
       <button class="btn" data-tab="fav" bindtap="goHouses">我的收藏</button>
       <button class="btn" bindtap="goAppointments">我的预约</button>
       <button class="btn" bindtap="goContracts">我的合同</button>
+      <button class="btn" bindtap="goRepairs">我的报修</button>
       <button class="btn" bindtap="goProfile" type="primary">进入个人中心</button>
     </block>
 

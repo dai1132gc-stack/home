@@ -72,13 +72,14 @@
       <button class="btn ghost" loading="{{acting}}" bindtap="download" disabled="{{!contract.pdfAvailable}}">
         下载 PDF
       </button>
+      <button wx:if="{{contract.status === 'ACTIVE'}}" class="btn repair" bindtap="goRepair">申请报修</button>
       <button
         wx:if="{{contract.status === 'PENDING_SIGN'}}"
         class="btn primary"
         loading="{{acting}}"
         bindtap="confirm"
       >确认签署</button>
-      <button wx:else class="btn primary disabled" disabled>已{{contract.statusLabel}}</button>
+      <button wx:elif="{{contract.status !== 'ACTIVE'}}" class="btn primary disabled" disabled>已{{contract.statusLabel}}</button>
     </view>
   </block>
 </view>

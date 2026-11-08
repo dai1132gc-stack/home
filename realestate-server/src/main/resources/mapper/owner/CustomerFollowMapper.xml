@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.realestate.modules.owner.mapper.CustomerFollowMapper">
+
+    <select id="selectPageList" resultType="com.example.realestate.modules.owner.model.vo.CustomerFollowRow">
+        SELECT f.id, f.owner_id, f.content, f.follow_type, f.next_follow_at,
+               f.created_by, f.created_at,
+               COALESCE(u.nickname, u.username) AS created_by_name
+        FROM customer_follow f
+        LEFT JOIN sys_user u ON u.id = f.created_by
+        WHERE f.owner_id = #{ownerId}
+        ORDER BY f.created_at DESC, f.id DESC
+        LIMIT #{offset}, #{size}
+    </select>
+
+    <select id="countByOwner" resultType="long">
+        SELECT COUNT(*)
+        FROM customer_follow
+        WHERE owner_id = #{ownerId}
+    </select>
+
+    <select id="selectVoById" resultType="com.example.realestate.modules.owner.model.vo.CustomerFollowRow">
+        SELECT f.id, f.owner_id, f.content, f.follow_type, f.next_follow_at,
+               f.created_by, f.created_at,
+               COALESCE(u.nickname, u.username) AS created_by_name
+        FROM customer_follow f
+        LEFT JOIN sys_user u ON u.id = f.created_by
+        WHERE f.id = #{id}
+    </select>
+
+</mapper>

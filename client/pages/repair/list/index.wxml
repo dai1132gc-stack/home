@@ -1,0 +1,75 @@
+<!--pages/repair/list/index.wxml-->
+<navigation-bar title="我的报修" back="{{true}}" color="black" background="#FFF"></navigation-bar>
+
+<view class="page">
+  <view class="tabs">
+    <view
+      wx:for="{{tabs}}"
+      wx:key="value"
+      class="tab {{status === item.value ? 'active' : ''}}"
+      data-status="{{item.value}}"
+      bindtap="switchStatus"
+    >{{item.label}}</view>
+  </view>
+
+  <scroll-view class="list" scroll-y type="list" bindscrolltolower="onScrollToLower" lower-threshold="120">
+    <view wx:if="{{!loggedIn}}" class="empty">
+      <text>登录后查看报修记录</text>
+      <button size="mini" class="retry" bindtap="goLogin">去登录</button>
+    </view>
+
+    <view wx:elif="{{error}}" class="empty">
+      <text>{{error}}</text>
+      <button size="mini" class="retry" bindtap="goLogin" wx:if="{{!items.length}}">去登录</button>
+    </view>
+
+    <view wx:elif="{{items.length === 0 && !loading}}" class="empty">
+      <text>还没有报修记录</text>
+      <button size="mini" class="retry" bindtap="goCreate">去申请报修</button>
+    </view>
+
+    <view class="card" wx:for="{{items}}" wx:key="id" data-id="{{item.id}}" bindtap="goDetail">
+      <view class="row">
+        <text class="title">{{item.title}}</text>
+        <text class="status status-{{item.status}}">{{item.statusText}}</text>
+      </view>
+      <view class="meta">单号：{{item.ticketNo}}</view>
+      <view class="meta">{{item.houseTitle || '房源'}} · {{item.categoryText}}<text wx:if="{{item.urgency === 'URGENT'}}"> · 紧急</text></view>
+      <view class="meta" wx:if="{{item.contractNo}}">合同：{{item.contractNo}}</view>
+      <view class="meta">提交于 {{item.createdText}}</view>
+      <view class="bottom">
+        <button
+          wx:if="{{item.canCancel}}"
+          class="mini ghost"
+          size="mini"
+          data-id="{{item.id}}"
+          data-action="cancel"
+          loading="{{acting}}"
+          catchtap="act"
+        >撤销</button>
+        <button
+          wx:if="{{item.canClose}}"
+          class="mini primary"
+          size="mini"
+          data-id="{{item.id}}"
+          data-action="close"
+          loading="{{acting}}"
+          catchtap="act"
+        >确认完成</button>
+        <button
+          wx:if="{{item.canReopen}}"
+          class="mini ghost"
+          size="mini"
+          data-id="{{item.id}}"
+          data-action="reopen"
+          loading="{{acting}}"
+          catchtap="act"
+        >重新打开</button>
+      </view>
+    </view>
+
+    <view class="loading" wx:if="{{loading}}">加载中…</view>
+    <view class="loading" wx:elif="{{finished && items.length > 0}}">没有更多了</view>
+    <view class="footer-space"></view>
+  </scroll-view>
+</view>

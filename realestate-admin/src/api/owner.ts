@@ -1,7 +1,13 @@
 import { del, get, patch, post } from '@/utils/request'
 
 import type { PageResult } from '@/types/api'
-import type { OwnerFormPayload, OwnerQueryParams, OwnerVO } from '@/types/owner'
+import type {
+  CustomerFollow,
+  CustomerFollowPayload,
+  OwnerFormPayload,
+  OwnerQueryParams,
+  OwnerVO,
+} from '@/types/owner'
 
 /** 客源分页列表（ADMIN） */
 export function listOwners(params: OwnerQueryParams): Promise<PageResult<OwnerVO>> {
@@ -23,4 +29,16 @@ export function updateOwner(id: number, payload: OwnerFormPayload): Promise<Owne
 
 export function deleteOwner(id: number): Promise<void> {
   return del<void>(`/owners/${id}`)
+}
+
+/** 客源跟进（ADMIN） */
+export function listFollows(
+  ownerId: number,
+  params: { page?: number; size?: number },
+): Promise<PageResult<CustomerFollow>> {
+  return get<PageResult<CustomerFollow>>(`/owners/${ownerId}/follows`, { params })
+}
+
+export function createFollow(ownerId: number, payload: CustomerFollowPayload): Promise<CustomerFollow> {
+  return post<CustomerFollow>(`/owners/${ownerId}/follows`, payload)
 }

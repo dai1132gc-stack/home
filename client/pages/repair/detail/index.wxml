@@ -1,0 +1,72 @@
+<!--pages/repair/detail/index.wxml-->
+<navigation-bar title="报修详情" back="{{true}}" color="black" background="#FFF"></navigation-bar>
+
+<view class="page">
+  <view wx:if="{{loading}}" class="state">加载中…</view>
+  <view wx:elif="{{error}}" class="state">
+    <text>{{error}}</text>
+    <button size="mini" class="retry" bindtap="goList">我的报修</button>
+  </view>
+
+  <block wx:else>
+    <scroll-view class="body" scroll-y type="list">
+      <view class="panel hero">
+        <view class="row">
+          <text class="title">{{detail.title}}</text>
+          <text class="status status-{{detail.status}}">{{detail.statusLabel}}</text>
+        </view>
+        <view class="meta">单号：{{detail.ticketNo}}</view>
+        <view class="meta">{{detail.houseTitle || '房源'}} · {{detail.categoryLabel}}<text wx:if="{{detail.urgency === 'URGENT'}}"> · 紧急</text></view>
+        <view class="meta" wx:if="{{detail.houseAddress}}">{{detail.houseAddress}}</view>
+        <view class="meta" wx:if="{{detail.contractNo}}">关联合同：{{detail.contractNo}}</view>
+        <view class="meta">联系电话：{{detail.contactPhone}}</view>
+        <view class="meta">期望上门：{{visitText}}</view>
+        <view class="meta">提交时间：{{createdText}}</view>
+      </view>
+
+      <view class="panel">
+        <view class="section-title">问题描述</view>
+        <text class="content">{{detail.description}}</text>
+      </view>
+
+      <view class="panel" wx:if="{{detail.media.length}}">
+        <view class="section-title">现场图片（私有存储）</view>
+        <view class="images">
+          <image
+            wx:for="{{detail.media}}"
+            wx:key="id"
+            class="shot"
+            src="{{mediaPaths[item.id] || ''}}"
+            mode="aspectFill"
+            data-url="{{mediaPaths[item.id] || ''}}"
+            bindtap="previewImage"
+          />
+        </view>
+      </view>
+
+      <view class="panel">
+        <view class="section-title">处理进度</view>
+        <view class="timeline">
+          <view class="log" wx:for="{{logs}}" wx:key="id">
+            <view class="dot"></view>
+            <view class="log-main">
+              <view class="log-title">{{item.fromStatusLabel || '创建'}} → {{item.toStatusLabel}}</view>
+              <view class="log-meta">{{item.timeText}}</view>
+              <view class="log-meta" wx:if="{{item.reason}}">{{item.reason}}</view>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <view class="tip">处理完成后请确认关闭；若问题仍未解决，可重新打开工单。</view>
+      <view class="footer-space"></view>
+    </scroll-view>
+
+    <view class="actions">
+      <button wx:if="{{canCancel}}" class="btn ghost" loading="{{acting}}" data-action="cancel" bindtap="act">撤销报修</button>
+      <button wx:if="{{canClose}}" class="btn primary" loading="{{acting}}" data-action="close" bindtap="act">确认完成</button>
+      <button wx:if="{{canReopen}}" class="btn ghost" loading="{{acting}}" data-action="reopen" bindtap="act">重新打开</button>
+      <button wx:if="{{!canCancel && !canClose && !canReopen}}" class="btn disabled" disabled>当前状态不可操作</button>
+    </view>
+  </block>
+</view>

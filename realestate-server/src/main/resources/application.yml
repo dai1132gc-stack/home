@@ -53,6 +53,9 @@ app:
     public-base-url: ${STORAGE_PUBLIC_BASE_URL:/uploads}
     private-root: ${STORAGE_PRIVATE_ROOT:uploads-private}
     max-image-size-bytes: ${STORAGE_MAX_IMAGE_SIZE_BYTES:10485760}
+  contract:
+    # W4 合同到期扫描（Asia/Shanghai），默认每日 01:10
+    expiry-cron: ${CONTRACT_EXPIRY_CRON:0 10 1 * * *}
 
 management:
   endpoints:

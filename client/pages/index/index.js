@@ -62,4 +62,26 @@ Page({
     }
     wx.navigateTo({ url: '/pages/contract/list/index' })
   },
+
+  goRepairs() {
+    if (!getAccessToken()) {
+      this.goLogin()
+      return
+    }
+    wx.navigateTo({ url: '/pages/repair/list/index' })
+  },
+
+  goGuides(e) {
+    const category = (e && e.currentTarget && e.currentTarget.dataset.category) || ''
+    const url = '/pages/content/list/index?type=guide' + (category ? '&category=' + category : '')
+    wx.navigateTo({ url })
+  },
+
+  goPolicies() {
+    wx.navigateTo({ url: '/pages/content/list/index?type=policy' })
+  },
+
+  goCalculator() {
+    wx.navigateTo({ url: '/pages/calculator/index' })
+  },
 })

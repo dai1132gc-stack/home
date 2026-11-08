@@ -62,6 +62,12 @@ const router = createRouter({
           meta: { requiresAuth: true, roles: ['ADMIN'], title: '新建房东/客源' },
         },
         {
+          path: 'owners/:id',
+          name: 'owner-detail',
+          component: () => import('@/views/owner/OwnerDetailView.vue'),
+          meta: { requiresAuth: true, roles: ['ADMIN'], title: '客源跟进' },
+        },
+        {
           path: 'owners/:id/edit',
           name: 'owner-edit',
           component: () => import('@/views/owner/OwnerFormView.vue'),
@@ -90,6 +96,30 @@ const router = createRouter({
           name: 'contract-detail',
           component: () => import('@/views/contract/ContractDetailView.vue'),
           meta: { requiresAuth: true, roles: ['ADMIN'], title: '合同详情' },
+        },
+        {
+          path: 'repairs',
+          name: 'repair-list',
+          component: () => import('@/views/repair/RepairListView.vue'),
+          meta: { requiresAuth: true, roles: ['ADMIN'], title: '报修管理' },
+        },
+        {
+          path: 'contents/guides',
+          name: 'content-guides',
+          component: () => import('@/views/content/GuideManageView.vue'),
+          meta: { requiresAuth: true, roles: ['ADMIN'], title: '内容管理' },
+        },
+        {
+          path: 'contents/policies',
+          name: 'content-policies',
+          component: () => import('@/views/content/PolicyManageView.vue'),
+          meta: { requiresAuth: true, roles: ['ADMIN'], title: '政策文件' },
+        },
+        {
+          path: 'calculator',
+          name: 'calculator',
+          component: () => import('@/views/calculator/CalculatorView.vue'),
+          meta: { requiresAuth: true, roles: ['ADMIN'], title: '测算工具' },
         },
       ],
     },

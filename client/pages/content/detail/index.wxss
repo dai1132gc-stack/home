@@ -1,0 +1,90 @@
+/**pages/content/detail/index.wxss**/
+page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #f5f6f8;
+}
+.page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.state {
+  padding-top: 200rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24rpx;
+  color: #8a9099;
+  font-size: 28rpx;
+}
+.body {
+  flex: 1;
+  height: 0;
+  padding: 24rpx;
+  box-sizing: border-box;
+}
+.header {
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 28rpx;
+  margin-bottom: 20rpx;
+}
+.title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #1f2329;
+  line-height: 1.5;
+}
+.meta {
+  margin-top: 16rpx;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12rpx;
+}
+.badge {
+  font-size: 21rpx;
+  color: #2b6de5;
+  background: #eef4ff;
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+}
+.meta-text {
+  font-size: 23rpx;
+  color: #9aa0a8;
+}
+.summary {
+  margin-top: 16rpx;
+  font-size: 26rpx;
+  color: #5b626c;
+  line-height: 1.7;
+  padding-top: 16rpx;
+  border-top: 1rpx solid #f2f3f5;
+}
+.content-card {
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 28rpx;
+}
+.content {
+  font-size: 28rpx;
+  color: #3d434b;
+  line-height: 1.9;
+  white-space: pre-wrap;
+}
+.tip {
+  margin-top: 20rpx;
+  font-size: 22rpx;
+  color: #9aa0a8;
+  text-align: center;
+}
+.footer-space {
+  height: 40rpx;
+}
+.retry {
+  background: #eef4ff;
+  color: #2b6de5;
+}

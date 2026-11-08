@@ -1,0 +1,154 @@
+<!--pages/calculator/index.wxml-->
+<navigation-bar title="房贷计算" back="{{true}}" color="black" background="#FFF"></navigation-bar>
+
+<scroll-view class="scroll" scroll-y type="list">
+  <view class="page">
+    <view class="note">测算结果仅供参考，示例费率与规则非实时政策。</view>
+
+    <view class="tabs">
+      <view class="tab {{tab === 'mortgage' ? 'active' : ''}}" data-tab="mortgage" bindtap="switchTab">房贷</view>
+      <view class="tab {{tab === 'tax' ? 'active' : ''}}" data-tab="tax" bindtap="switchTab">税费</view>
+    </view>
+
+    <block wx:if="{{tab === 'mortgage'}}">
+      <view class="panel">
+        <view class="form-item">
+          <text class="label">贷款类型</text>
+          <picker range="{{loanTypes}}" range-key="label" value="{{loanTypeIndex}}" bindchange="onLoanTypeChange">
+            <view class="value">{{loanTypes[loanTypeIndex].label}} ›</view>
+          </picker>
+        </view>
+        <view class="form-item">
+          <text class="label">还款方式</text>
+          <picker range="{{methods}}" range-key="label" value="{{methodIndex}}" bindchange="onMethodChange">
+            <view class="value">{{methods[methodIndex].label}} ›</view>
+          </picker>
+        </view>
+        <view class="form-item">
+          <text class="label">贷款年限</text>
+          <picker range="{{years}}" value="{{yearsIndex}}" bindchange="onYearsChange">
+            <view class="value">{{years[yearsIndex]}} 年 ›</view>
+          </picker>
+        </view>
+        <view class="form-item">
+          <text class="label">房屋总价</text>
+          <input class="input" type="digit" value="{{totalPrice}}" bindinput="onTotalPriceInput" />
+        </view>
+        <view class="form-item">
+          <text class="label">首付金额</text>
+          <input class="input" type="digit" value="{{downPayment}}" bindinput="onDownPaymentInput" />
+        </view>
+        <view class="form-item">
+          <text class="label">年利率(%)</text>
+          <input class="input" type="digit" value="{{annualRate}}" placeholder="留空用配置" bindinput="onRateInput" />
+        </view>
+        <view class="hint">{{rateHint}}</view>
+      </view>
+
+      <button class="submit" loading="{{computing}}" bindtap="submitMortgage">开始测算</button>
+
+      <block wx:if="{{mortgage}}">
+        <view class="panel result">
+          <view class="stat-grid">
+            <view class="stat">
+              <view class="stat-label">贷款金额</view>
+              <view class="stat-value">{{mortgage.loanAmountText}}</view>
+            </view>
+            <view class="stat">
+              <view class="stat-label">首月还款</view>
+              <view class="stat-value primary">{{mortgage.firstMonthText}}</view>
+            </view>
+            <view class="stat">
+              <view class="stat-label">总利息</view>
+              <view class="stat-value">{{mortgage.totalInterestText}}</view>
+            </view>
+            <view class="stat">
+              <view class="stat-label">总还款</view>
+              <view class="stat-value">{{mortgage.totalRepaymentText}}</view>
+            </view>
+          </view>
+          <view class="row"><text class="row-label">贷款类型</text><text>{{mortgage.loanTypeLabel}}</text></view>
+          <view class="row"><text class="row-label">还款方式</text><text>{{mortgage.repaymentMethodLabel}}</text></view>
+          <view class="row"><text class="row-label">期限</text><text>{{mortgage.termYears}} 年 / {{mortgage.months}} 期</text></view>
+          <view class="row"><text class="row-label">年利率</text><text>{{mortgage.rateText}}</text></view>
+          <view class="row"><text class="row-label">末月还款</text><text>{{mortgage.lastMonthText}}</text></view>
+          <view class="row"><text class="row-label">费率来源</text><text class="row-value">{{mortgage.rateSourceText}}</text></view>
+
+          <view class="section-title">按年汇总</view>
+          <view class="year-row year-head">
+            <text class="year-cell">年</text>
+            <text class="year-cell">还本金</text>
+            <text class="year-cell">还利息</text>
+            <text class="year-cell">剩余</text>
+          </view>
+          <view class="year-row" wx:for="{{mortgage.yearly}}" wx:key="year">
+            <text class="year-cell">{{item.year}}</text>
+            <text class="year-cell">{{item.principalText}}</text>
+            <text class="year-cell">{{item.interestText}}</text>
+            <text class="year-cell">{{item.balanceText}}</text>
+          </view>
+
+          <view class="section-title">假设与说明</view>
+          <view class="assumption" wx:for="{{mortgage.assumptions}}" wx:key="*this">· {{item}}</view>
+          <view class="disclaimer">{{mortgage.disclaimer}}</view>
+        </view>
+      </block>
+    </block>
+
+    <block wx:else>
+      <view class="panel">
+        <view class="form-item">
+          <text class="label">城市</text>
+          <picker wx:if="{{cities.length}}" range="{{cities}}" value="{{cityIndex}}" bindchange="onCityChange">
+            <view class="value">{{cities[cityIndex]}} ›</view>
+          </picker>
+          <text wx:else class="value">暂无规则</text>
+        </view>
+        <view class="form-item">
+          <text class="label">成交价</text>
+          <input class="input" type="digit" value="{{taxPrice}}" bindinput="onTaxPriceInput" />
+        </view>
+        <view class="form-item">
+          <text class="label">面积(㎡)</text>
+          <input class="input" type="digit" value="{{taxArea}}" placeholder="选填" bindinput="onTaxAreaInput" />
+        </view>
+        <view class="form-item">
+          <text class="label">是否首套</text>
+          <switch checked="{{firstHome}}" color="#2b6de5" bindchange="onFirstHomeChange" />
+        </view>
+        <view class="hint">暂无匹配规则时后端返回 400，不做猜测。</view>
+      </view>
+
+      <button class="submit" loading="{{computing}}" bindtap="submitTax">开始测算</button>
+
+      <block wx:if="{{tax}}">
+        <view class="panel result">
+          <view class="stat-grid two">
+            <view class="stat">
+              <view class="stat-label">成交价</view>
+              <view class="stat-value">{{tax.priceText}}</view>
+            </view>
+            <view class="stat">
+              <view class="stat-label">税费合计</view>
+              <view class="stat-value primary">{{tax.totalTaxText}}</view>
+            </view>
+          </view>
+          <view class="tax-item" wx:for="{{tax.items}}" wx:key="taxType">
+            <view class="tax-head">
+              <text class="tax-name">{{item.taxTypeLabel}}</text>
+              <text class="tax-amount">{{item.amountText}}</text>
+            </view>
+            <view class="tax-meta">基数 {{item.baseText}} · 税率 {{item.rateText}} · 扣除 {{item.deductionText}}</view>
+            <view class="tax-meta">{{item.source}}（{{item.effectiveDate}}）</view>
+          </view>
+
+          <view class="section-title">假设与说明</view>
+          <view class="assumption" wx:for="{{tax.assumptions}}" wx:key="*this">· {{item}}</view>
+          <view class="disclaimer">{{tax.disclaimer}}</view>
+        </view>
+      </block>
+    </block>
+
+    <view class="footer-space"></view>
+  </view>
+</scroll-view>

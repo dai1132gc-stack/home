@@ -1,0 +1,34 @@
+<!--pages/content/list/index.wxml-->
+<navigation-bar title="{{title}}" back="{{true}}" color="black" background="#FFF"></navigation-bar>
+
+<view class="page">
+  <view class="tabs">
+    <view
+      wx:for="{{tabs}}"
+      wx:key="value"
+      class="tab {{category === item.value ? 'active' : ''}}"
+      data-value="{{item.value}}"
+      bindtap="switchCategory"
+    >{{item.label}}</view>
+  </view>
+
+  <scroll-view class="list" scroll-y type="list" bindscrolltolower="onScrollToLower" lower-threshold="120">
+    <view wx:if="{{error}}" class="empty">{{error}}</view>
+    <view wx:elif="{{items.length === 0 && !loading}}" class="empty">暂无内容</view>
+
+    <view class="card" wx:for="{{items}}" wx:key="id" data-id="{{item.id}}" bindtap="goDetail">
+      <view class="row">
+        <text class="title">{{item.title}}</text>
+        <text class="badge">{{item.categoryText}}</text>
+      </view>
+      <view class="summary" wx:if="{{item.summary}}">{{item.summary}}</view>
+      <view class="meta" wx:if="{{item.source}}">来源：{{item.source}}</view>
+      <view class="meta">{{type === 'policy' ? (item.docNo || '无文号') : '更新于'}} {{type === 'policy' ? '' : item.dateText}}</view>
+      <view class="meta" wx:if="{{type === 'policy'}}">发布日期：{{item.dateText}}</view>
+    </view>
+
+    <view class="loading" wx:if="{{loading}}">加载中…</view>
+    <view class="loading" wx:elif="{{finished && items.length > 0}}">没有更多了</view>
+    <view class="footer-space"></view>
+  </scroll-view>
+</view>

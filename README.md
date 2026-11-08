@@ -2,12 +2,13 @@
 
 ## 当前状态
 
-- 当前技术方案版本：**V4.0**（W3 预约带看、交易与合同已完成并通过端到端验收；W1 见方案第 21 节，W2 见第 22 节，W3 见第 23 节）。
+- 当前技术方案版本：**V5.0**（W4 租后服务与工具已完成并通过端到端验收；W1 见方案第 21 节，W2 第 22 节，W3 第 23 节，W4 第 24 节）。
 - 完整方案：[`技术方案.md`](../技术方案.md)。
 - W1 已交付三端工程：后端 `realestate-server`（Spring Boot 3.5.6 + JWT + Redis 会话）、Web `realestate-admin`（Vue 3 + TS）、小程序 `client`（原生，增量新增认证模块）。
 - W2 在此基础上新增：房源 CRUD 与状态机、条件筛选与排序（下推 SQL）、图片上传与媒体关联、房东/客源管理、客户收藏、数据权限隔离；Web 新增房源/客源页面，小程序新增房源列表/详情/收藏。
 - W3 新增：预约带看（客户提交、ADMIN 确认/取消/完成/爽约、客户取消）、合同（起草→待签→客户确认生效→终止，含房源/双方/条款快照）、交易节点（定金/签约/交房 + 状态日志）、中文合同 PDF（字体嵌入、金额大写、长地址换行、表格跨页、私有存储 + 鉴权下载）、房源状态扩展 `RESERVED/CONTRACTED` 并与预约/合同联动；Web 新增预约/合同页面，小程序新增预约看房/我的预约/我的合同。
-- `home/client` 是用户已创建的原生微信小程序工程，W1/W2/W3 均保留并增量修改，未迁移 uni-app。
+- W4 新增：报修工单（客户提交、ADMIN 受理/处理/解决、客户关闭/撤销/重开、状态时间线、私有图片鉴权预览）、内容政策（教程/网签指引/公告、政策文档、草稿/发布/下架、纯文本正文、政策 PDF 附件）、房贷与税费测算（商贷/公积金、等额本息/本金、税费分档、公开限流、配置来源与免责声明）、客源跟进（复用 V2 `customer_follow`）、合同到期定时任务（Redis 锁、幂等、释放房源）；Web 新增报修/内容/跟进/测算页面，小程序新增报修/内容/测算页面。
+- `home/client` 是用户已创建的原生微信小程序工程，W1～W4 均保留并增量修改，未迁移 uni-app。
 - 下文启动命令已随工程落地生效。
 - 所有项目源码、启动说明和项目内文档统一放在 `D:/graduate/home/`；总体技术方案保留在 `D:/graduate/技术方案.md`。
 
@@ -142,11 +143,13 @@ mvn spring-boot:run -Dspring-boot.run.arguments="--server.port=8080"
 
 > 注意：本机环境下 `spring-boot:run` 的 `server.port` 可能被环境源注入为随机端口，必须通过 `-Dspring-boot.run.arguments="--server.port=8080"` 强制指定 8080（详见技术方案 21.6 已知限制）。
 
-首次启动由 Flyway 自动执行 `V1__init_auth.sql`、`V2__house_owner.sql` 与 `V3__appointment_contract.sql` 建表，`BootstrapInitializer` 创建初始 `admin`/`customer` 账号（dev 默认密码 `Admin@123456`/`Customer@123456`，仅本地）。
+首次启动由 Flyway 自动执行 `V1__init_auth.sql`、`V2__house_owner.sql`、`V3__appointment_contract.sql` 与 `V4__repair_content_calculator.sql` 建表，`BootstrapInitializer` 创建初始 `admin`/`customer` 账号（dev 默认密码 `Admin@123456`/`Customer@123456`，仅本地）。
 
-图片上传目录 `realestate-server/uploads/` 由 `LocalStorageService` 启动时自动创建（已加入 `.gitignore`），dev 下通过 `http://localhost:8080/uploads/...` 访问；生产用 `STORAGE_TYPE=oss` 切换对象存储（W4 接入实现）。
+图片上传目录 `realestate-server/uploads/` 由 `LocalStorageService` 启动时自动创建（已加入 `.gitignore`），dev 下通过 `http://localhost:8080/uploads/...` 访问；生产用 `STORAGE_TYPE=oss` 切换对象存储（OSS 实现尚未接入，W4 私有文件仍落本地私有目录）。
 
 合同 PDF 存放在**私有目录** `realestate-server/uploads-private/`（`STORAGE_PRIVATE_ROOT`，已加入 `.gitignore`），不注册静态映射，只能通过 `GET /api/v1/contracts/{id}/pdf` 鉴权下载。中文字体为 Noto Sans SC（SIL OFL 1.1），位于 `src/main/resources/fonts/`，来源与许可见该目录 `OFL.txt` 与技术方案 23.5。
+
+W4 的报修图片与政策附件同样存放在 `uploads-private/`（`repair/yyyyMM/`、`policy/yyyyMM/`），数据库只保存相对 key，不产生公开 URL；报修图片通过 `GET /api/v1/repairs/{id}/media/{mediaId}`、政策附件通过 `GET /api/v1/policies/{id}/attachment` 鉴权流式读取。
 
 ### 4.3 启动 Web 管理端
 
@@ -178,29 +181,37 @@ http://localhost:5174
 6. W2 已新增房源入口：首页「浏览房源」进入 `pages/house/list`，卡片支持出租/出售筛选与最新/价格排序；详情页 `pages/house/detail` 支持图片轮播与收藏（未登录点收藏会跳登录）。列表页「我的收藏」需要客户登录。
 7. W3 新增客户入口：房源详情底部「预约看房」→ `pages/appointment/create`（选日期/时间、填电话，未登录跳登录）；首页「我的预约」→ `pages/appointment/list`（可取消待确认/已确认预约）；首页「我的合同」→ `pages/contract/list`，详情页可确认签署并下载 PDF（`wx.downloadFile` + `wx.openDocument`）。
 8. 正式微信 code 登录待 AppID/AppSecret 可用后接入；W5 再进行真机预览、上传/下载合法域名与弱网测试。
+9. W4 新增客户入口：首页「租房指南/公告」进入 `pages/content/list`（按分类筛选）→ 详情纯文本渲染；「政策文件」进入政策列表；「房贷计算」进入 `pages/calculator/index`（房贷/税费）；登录后「我的报修」进入 `pages/repair/list`，可提交、撤销、确认完成、重新打开并查看私有图片；房源详情与 ACTIVE 合同详情提供「申请报修」入口。
 
 小程序 `wx.request` 不依赖浏览器 CORS，但后端接口认证、权限和 HTTPS 要求不变。
 
-### 4.5 W2/W3 功能入口与权限
+### 4.5 W2/W3/W4 功能入口与权限
 
 | 端 | 入口 | 说明 |
 |---|---|---|
 | Web | 左侧菜单「房源管理」 | 列表（状态/类型/区域/价格/排序筛选）→ 新建/编辑（含图片上传）→ 详情（发布/下架/删除）；状态含待发布/已发布/已预定/已签约/已下架 |
-| Web | 左侧菜单「客源管理」 | 房东与客源建档、编辑、逻辑删除；手机号仅 ADMIN 可见 |
+| Web | 左侧菜单「客源管理」 | 房东与客源建档、编辑、逻辑删除；手机号仅 ADMIN 可见；列表「跟进/详情」进入客源跟进（新增、分页、下次跟进时间） |
 | Web | 左侧菜单「预约管理」 | 状态/日期筛选；确认（房源置已预定）、取消、完成、标记爽约 |
 | Web | 左侧菜单「合同管理」 | 列表/起草（选房源与客户、租期、金额、押金）/详情（双方、交易节点、状态日志、PDF 预览与下载）/提交待签/终止 |
+| Web | 左侧菜单「报修管理」 | 状态/分类/日期筛选；受理、开始处理、完成处理、关闭；详情抽屉含问题描述、私有图片预览与状态时间线 |
+| Web | 左侧菜单「内容管理」 | 教程与公告、政策文件两页；新建/编辑（纯文本 + 换行预览）/发布/下架/删除；政策附件上传与鉴权下载 |
+| Web | 左侧菜单「测算工具」 | 商业贷款/公积金、等额本息/本金、首付与利率、按年汇总、费率来源与免责声明；税费明细与分档规则 |
 | 小程序 | 首页「浏览房源」 | 已发布房源卡片列表，支持出租/出售筛选与最新/价格排序 |
-| 小程序 | 房源详情页 | 图片轮播、价格与户型信息、收藏、预约看房 |
+| 小程序 | 房源详情页 | 图片轮播、价格与户型信息、收藏、预约看房、申请报修 |
 | 小程序 | 首页「我的收藏」 | 需客户登录；仅展示仍在架房源 |
 | 小程序 | 首页「我的预约」 | 提交记录、状态、取消本人待确认/已确认预约 |
-| 小程序 | 首页「我的合同」 | 列表/详情、待签署合同确认、下载 PDF |
+| 小程序 | 首页「我的合同」 | 列表/详情、待签署合同确认、下载 PDF、ACTIVE 合同申请报修 |
+| 小程序 | 首页「我的报修」 | 提交（分类/紧急度/描述/最多 6 张图片/电话/期望时间）、状态筛选、撤销、确认完成、重新打开、私有图片预览 |
+| 小程序 | 首页「租房指南/公告/政策文件」 | 公开只读已发布内容，详情按纯文本换行渲染 |
+| 小程序 | 首页「房贷计算」 | 商贷/公积金、等额本息/本金、税费测算与结果说明 |
 
 权限规则（接口端强制，前端菜单只是展示）：
 
-- 游客：仅 `GET /houses`、`GET /houses/{id}`，且只能看到 `PUBLISHED`；预约/合同/PDF 一律 401。
-- CUSTOMER：可浏览已发布房源、收藏/取消收藏、提交与取消本人预约、查看与确认本人合同、下载本人 PDF；访问房东接口、房源写接口、他人预约/合同返回 403 或 404。
-- ADMIN：可管理全部房源、媒体、客源、预约、合同与交易节点；合同起草/提交/终止仅 ADMIN。
-- 房源状态联动：预约确认 `PUBLISHED→RESERVED`；合同生效 `→CONTRACTED`；合同终止且无其他占用合同 `→PUBLISHED`。`RESERVED/CONTRACTED` 不出现在公开列表，ADMIN 管理端可见。
+- 游客：仅 `GET /houses`、`GET /houses/{id}`、`GET /guides`、`GET /guides/{id}`、`GET /policies`、`GET /policies/{id}`、`POST /calculators/mortgage`、`POST /calculators/tax`、`GET /calculators/config`；报修/合同/预约/PDF/政策附件一律 401。
+- CUSTOMER：可浏览已发布房源与内容、收藏、提交与取消本人预约、查看与确认本人合同、下载本人 PDF、提交/撤销/关闭/重开本人报修、读取本人报修图片；访问他人报修/图片/合同/预约返回 404。
+- ADMIN：可管理全部房源、媒体、客源与跟进、预约、合同、报修、内容政策与测算配置；合同起草/提交/终止、内容发布/下架、到期任务手动触发仅 ADMIN。
+- 房源状态联动：预约确认 `PUBLISHED→RESERVED`；合同生效 `→CONTRACTED`；合同终止或到期且无其他占用合同 `→PUBLISHED`。`RESERVED/CONTRACTED` 不出现在公开列表，ADMIN 管理端可见。
+- 报修状态联动：`SUBMITTED→ACCEPTED→PROCESSING→RESOLVED→CLOSED`，允许 `CANCELLED`/`REOPENED`；非法迁移与重复操作 409。
 
 ## 五、构建与测试命令（对应阶段完成后生效）
 
@@ -252,7 +263,7 @@ npm run lint
 - 核心异常返回正确 HTTP 状态、统一响应和 traceId。
 - 请求日志不含密码、令牌、完整手机号或合同正文。
 
-### 5.5 W2/W3 冒烟脚本（需后端、Web、Redis、MySQL 已启动）
+### 5.5 W2/W3/W4 冒烟脚本（需后端、Web、Redis、MySQL 已启动）
 
 ```bash
 cd /d/graduate/home
@@ -261,18 +272,21 @@ cd /d/graduate/home
 bash docs/smoke-w2.sh          # W2 回归：建房→上传→发布→权限→收藏→下架→删除（21 项）
 bash docs/smoke-w3.sh          # W3：预约→确认→RESERVED→合同→PDF→生效→CONTRACTED→终止→PUBLISHED，
                                #     含 401/403/404/409、脱敏、快照、PDF 鉴权、并发激活与占用、EXPLAIN（54 项）
+bash docs/smoke-w4.sh          # W4：V4 迁移与 customer_follow 结构、内容/政策、报修全链路与私有图片、
+                               #     跟进、测算与限流、到期任务、EXPLAIN（94 项）
 
-# 2) Web 真实浏览器（需 Chrome 以 --remote-debugging-port=9222 启动）
+# 2) Web 真实浏览器（需 Chrome 以 --headless=new --remote-debugging-port=9222 启动）
 node docs/web-smoke.mjs docs        # 登录/菜单/房源列表/客源页/刷新恢复会话
 node docs/web-house-flow.mjs docs   # 表单填写→图片上传→保存→发布→列表校验
 node docs/web-w3-flow.mjs docs      # 预约页/合同列表/详情/起草表单/房源状态筛选（截图写入 docs/）
+node docs/web-w4-flow.mjs docs      # 报修/内容/政策/测算/客源跟进（截图写入 docs/）
 
 # 3) 小程序页面逻辑（Node 模拟 wx，不含 GUI 渲染）
 node docs/mini-logic-smoke.mjs      # W2 浏览/收藏 + W3 预约/取消/合同确认/PDF 下载
+node docs/mini-w4-flow.mjs          # W4 报修提交/图片上传/流转、内容政策、房贷与税费测算
 ```
 
-`smoke-w3.sh` 会创建隔离测试账号 `customer2`（复用 `customer` 密码哈希，仅本地 dev），并临时插入 2000 条样本做 EXPLAIN 后立即清理。脚本会自动创建测试数据；如需清理开发库，可执行
-`DELETE FROM contract_party; DELETE FROM contract_status_log; DELETE FROM transaction_status_log; DELETE FROM transaction_process; DELETE FROM contract; DELETE FROM viewing_appointment; DELETE FROM house_favorite; DELETE FROM house_media; DELETE FROM house; DELETE FROM owner_profile;`（仅本地 dev）。
+`smoke-w3.sh`/`smoke-w4.sh` 会创建隔离测试账号 `customer2`（复用 `customer` 密码哈希，仅本地 dev），并临时插入 2000 条样本做 EXPLAIN 后立即清理。W4 脚本会按 `W4冒烟%` 前缀清理数据库测试行；`uploads-private/` 下的测试图片文件不会自动删除，可按需手工清理。脚本仅限本地 dev，生产不得执行。
 
 合同 PDF 样张：`docs/sample-contract.pdf` 与 `docs/sample-contract-page1.png`、`sample-contract-page2.png`（人工核对中文、长地址与跨页）。
 
@@ -286,7 +300,7 @@ node docs/mini-logic-smoke.mjs      # W2 浏览/收藏 + W3 预约/取消/合同
 3. 执行数据库备份后再运行 Flyway 迁移。
 4. Nginx 托管 Web `dist/` 并反向代理 `/api`，不向公网转发非必要 Actuator 端点。
 5. 后端启用优雅关闭和健康检查；MySQL/Redis 不开放公网访问。
-6. 合同和隐私文件放私有 OSS，通过短期签名 URL 下载。
+6. 合同、报修图片和政策附件放私有 OSS，通过短期签名 URL 下载；公开房源图片走 CDN。
 7. 微信公众平台配置 API、上传和下载合法域名。
 8. 验证备份恢复、日志滚动、磁盘容量和告警。
 
@@ -303,6 +317,14 @@ node docs/mini-logic-smoke.mjs      # W2 浏览/收藏 + W3 预约/取消/合同
 | 小程序开发者工具可用、真机失败 | HTTPS 合法域名、AppID、Token Storage、上传/下载域名和网络权限 |
 | PDF 中文乱码或方块 | 字体是否嵌入（`resources/fonts/NotoSansSC-Regular.ttf`）、`OFL.txt` 是否随包；PDF 由服务端生成，浏览器字体不影响 |
 | 合同提交/确认报 409 | 该房源已有待签署或生效中的合同；先终止旧合同，或确认操作重复提交 |
+| 报修受理/关闭报 409 | 工单状态已被他人变更（重复受理、跳过处理直接关闭、已撤销后再操作）；刷新详情查看时间线 |
+| 报修图片 401/404 | 图片为私有存储，需登录且仅本人或 ADMIN；他人访问按 404 处理，不能直接用 `/uploads` 访问 |
+| 报修图片上传 400/413 | 仅 JPG/PNG/GIF/WEBP 且真实文件头；单图 ≤10MB；单工单最多 6 张 |
+| 测算接口 429 | 同一 IP 每分钟超过 60 次；等待下一分钟窗口或检查代理是否统一了 X-Forwarded-For |
+| 测算返回 400“未找到规则” | 城市/金额区间或贷款类型+年限没有生效配置；检查 `loan_rate_config`/`tax_rule_config` 或手工输入利率 |
+| 政策附件 401 | 附件下载需登录；公开列表/详情匿名可读，附件不匿名开放 |
+| 内容草稿/下架后看不到 | 公开接口只返回 PUBLISHED；ADMIN 登录后可按状态筛选查看 |
+| 到期任务没有处理合同 | end_date 必须早于今天且状态为 ACTIVE；检查 Redis 锁 `lock:contract:expiry` 与后端日志 |
 | 合同 PDF 404 | 草稿阶段生成失败不阻塞（看后端日志）；提交待签/生效前必须生成，失败会返回 500 |
 | 预约确认报 409 | 房源已被其他预约占用或已下架/签约；先在预约管理取消占用预约 |
 | 房源列表看不到已预定房源 | 公开列表仅展示 `PUBLISHED`；`RESERVED/CONTRACTED` 只在 Web 管理端可见（见技术方案 23.8） |
@@ -322,8 +344,8 @@ node docs/mini-logic-smoke.mjs      # W2 浏览/收藏 + W3 预约/取消/合同
 | 当前初始方案 | V1.0 |
 | W1 工程基座与认证 | V2.0 |
 | W2 房源与客源 | V3.0 |
-| W3 交易与合同 | **V4.0（当前）** |
-| W4 租后服务与工具 | V5.0 |
+| W3 交易与合同 | V4.0 |
+| W4 租后服务与工具 | **V5.0（当前）** |
 | W5 小程序联调 | V6.0 |
 | W6 智能增强 | V7.0 |
 | W7 测试与优化 | V8.0 |

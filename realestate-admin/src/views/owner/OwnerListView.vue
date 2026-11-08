@@ -128,8 +128,11 @@ onMounted(load)
         <el-table-column label="更新时间" width="170">
           <template #default="{ row }">{{ formatTime(row.updatedAt) }}</template>
         </el-table-column>
-        <el-table-column label="操作" width="130" fixed="right">
+        <el-table-column label="操作" width="180" fixed="right">
           <template #default="{ row }">
+            <el-button link type="primary" @click="router.push({ name: 'owner-detail', params: { id: row.id } })">
+              跟进/详情
+            </el-button>
             <el-button link type="primary" @click="router.push({ name: 'owner-edit', params: { id: row.id } })">
               编辑
             </el-button>

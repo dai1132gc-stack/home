@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.realestate.modules.content.mapper.GuideArticleMapper">
+
+    <sql id="listColumns">
+        g.id, g.title, g.category, g.summary, g.status, g.sort, g.version,
+        g.created_at, g.updated_at
+    </sql>
+
+    <sql id="queryWhere">
+        WHERE g.deleted = 0
+        <choose>
+            <when test="publicOnly">
+                AND g.status = 'PUBLISHED'
+            </when>
+            <otherwise>
+                <if test="q.status != null and q.status != ''">
+                    AND g.status = #{q.status}
+                </if>
+            </otherwise>
+        </choose>
+        <if test="q.category != null and q.category != ''">
+            AND g.category = #{q.category}
+        </if>
+        <if test="q.keyword != null and q.keyword != ''">
+            AND g.title LIKE CONCAT(#{q.keyword}, '%')
+        </if>
+    </sql>
+
+    <select id="selectPageList" resultType="com.example.realestate.modules.content.model.vo.GuideListRow">
+        SELECT <include refid="listColumns"/>
+        FROM guide_article g
+        <include refid="queryWhere"/>
+        <choose>
+            <when test="publicOnly">
+                ORDER BY g.sort ASC, g.id DESC
+            </when>
+            <otherwise>
+                ORDER BY g.updated_at DESC, g.id DESC
+            </otherwise>
+        </choose>
+        LIMIT #{offset}, #{size}
+    </select>
+
+    <select id="countByQuery" resultType="long">
+        SELECT COUNT(*)
+        FROM guide_article g
+        <include refid="queryWhere"/>
+    </select>
+
+    <update id="publish">
+        UPDATE guide_article
+        SET status = 'PUBLISHED', version = version + 1, updated_at = #{now}
+        WHERE id = #{id} AND deleted = 0 AND status IN ('DRAFT', 'OFFLINE')
+    </update>
+
+    <update id="offline">
+        UPDATE guide_article
+        SET status = 'OFFLINE', version = version + 1, updated_at = #{now}
+        WHERE id = #{id} AND deleted = 0 AND status = 'PUBLISHED'
+    </update>
+
+</mapper>

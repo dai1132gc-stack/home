@@ -22,6 +22,7 @@ public enum ErrorCode {
     // 业务状态
     CONFLICT("COMMON_40901", 409, "当前状态不允许该操作"),
     DUPLICATE("COMMON_40902", 409, "数据已存在，请勿重复提交"),
+    RATE_LIMITED("COMMON_42901", 429, "请求过于频繁，请稍后重试"),
 
     // 文件
     FILE_INVALID("FILE_40001", 400, "文件类型或内容不合法"),

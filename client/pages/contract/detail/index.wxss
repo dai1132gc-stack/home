@@ -195,6 +195,12 @@ page {
   background: #f2f3f5;
   color: #9aa0a8;
 }
+.btn.repair {
+  background: #f2f3f5;
+  color: #4a515b;
+  flex: 0 0 170rpx;
+  font-size: 28rpx;
+}
 .retry {
   background: #eef4ff;
   color: #2b6de5;

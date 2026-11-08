@@ -1,0 +1,28 @@
+<!--pages/content/detail/index.wxml-->
+<navigation-bar title="{{type === 'policy' ? '政策详情' : '内容详情'}}" back="{{true}}" color="black" background="#FFF"></navigation-bar>
+
+<view class="page">
+  <view wx:if="{{loading}}" class="state">加载中…</view>
+  <view wx:elif="{{error}}" class="state">
+    <text>{{error}}</text>
+    <button size="mini" class="retry" bindtap="goBack">返回</button>
+  </view>
+
+  <scroll-view wx:else class="body" scroll-y type="list">
+    <view class="header">
+      <text class="title">{{detail.title}}</text>
+      <view class="meta">
+        <text class="badge">{{categoryText}}</text>
+        <text class="meta-text">{{metaText}}</text>
+      </view>
+      <view class="summary" wx:if="{{detail.summary}}">{{detail.summary}}</view>
+    </view>
+
+    <view class="content-card">
+      <text class="content">{{detail.content}}</text>
+    </view>
+
+    <view class="tip">内容为纯文本展示，不加载富文本或外部脚本。</view>
+    <view class="footer-space"></view>
+  </scroll-view>
+</view>

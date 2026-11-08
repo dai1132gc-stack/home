@@ -86,4 +86,25 @@
         </if>
     </select>
 
+    <select id="selectExpiredCandidates" resultType="com.example.realestate.modules.contract.model.entity.Contract">
+        SELECT id, contract_no, house_id, customer_id, owner_id, title, amount, deposit,
+               payment_cycle, start_date, end_date, status, template_version, snapshot_json,
+               pdf_url, signed_at, version, deleted, created_at, updated_at
+        FROM contract
+        WHERE deleted = 0
+          AND status = 'ACTIVE'
+          AND end_date &lt; #{today}
+        ORDER BY end_date ASC, id ASC
+        LIMIT #{limit}
+    </select>
+
+    <update id="expireIfActive">
+        UPDATE contract
+        SET status = 'EXPIRED', version = version + 1, updated_at = #{now}
+        WHERE id = #{id}
+          AND deleted = 0
+          AND status = 'ACTIVE'
+          AND end_date &lt; #{today}
+    </update>
+
 </mapper>

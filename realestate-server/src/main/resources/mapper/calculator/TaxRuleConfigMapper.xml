@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.realestate.modules.calculator.mapper.TaxRuleConfigMapper">
+
+    <sql id="columns">
+        id, city, rule_type, min_amount, max_amount, rate, quick_deduction,
+        effective_date, source, active, created_at
+    </sql>
+
+    <select id="selectActiveRules" resultType="com.example.realestate.modules.calculator.model.entity.TaxRuleConfig">
+        SELECT <include refid="columns"/>
+        FROM tax_rule_config
+        WHERE active = 1 AND effective_date &lt;= #{today}
+        ORDER BY city ASC, rule_type ASC, min_amount ASC, effective_date DESC
+    </select>
+
+    <!-- 区间命中：min_amount 含、max_amount 不含；同区间多条取最新生效 -->
+    <select id="selectMatchingRule" resultType="com.example.realestate.modules.calculator.model.entity.TaxRuleConfig">
+        SELECT <include refid="columns"/>
+        FROM tax_rule_config
+        WHERE city = #{city}
+          AND rule_type = #{ruleType}
+          AND active = 1
+          AND effective_date &lt;= #{today}
+          AND min_amount &lt;= #{amount}
+          AND (max_amount IS NULL OR #{amount} &lt; max_amount)
+        ORDER BY effective_date DESC, id DESC
+        LIMIT 1
+    </select>
+
+</mapper>

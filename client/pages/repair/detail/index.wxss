@@ -1,0 +1,165 @@
+/**pages/repair/detail/index.wxss**/
+page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #f5f6f8;
+}
+.page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.state {
+  padding-top: 200rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24rpx;
+  color: #8a9099;
+  font-size: 28rpx;
+}
+.body {
+  flex: 1;
+  height: 0;
+  padding: 20rpx 24rpx 0;
+  box-sizing: border-box;
+}
+.panel {
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 26rpx;
+  margin-bottom: 20rpx;
+}
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+.title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1f2329;
+  flex: 1;
+}
+.status {
+  font-size: 22rpx;
+  padding: 4rpx 14rpx;
+  border-radius: 8rpx;
+  background: #f2f3f5;
+  color: #6b7280;
+}
+.status-SUBMITTED {
+  background: #fff7e8;
+  color: #b26a00;
+}
+.status-PROCESSING,
+.status-REOPENED {
+  background: #eef4ff;
+  color: #2b6de5;
+}
+.status-RESOLVED {
+  background: #e8f8ee;
+  color: #1f9d55;
+}
+.status-CANCELLED {
+  background: #fdecec;
+  color: #c0392b;
+}
+.meta {
+  margin-top: 8rpx;
+  font-size: 25rpx;
+  color: #7b828c;
+}
+.section-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1f2329;
+  margin-bottom: 14rpx;
+}
+.content {
+  font-size: 27rpx;
+  color: #4a515b;
+  line-height: 1.8;
+  white-space: pre-wrap;
+}
+.images {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+.shot {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 12rpx;
+  background: #f2f3f5;
+}
+.timeline {
+  display: flex;
+  flex-direction: column;
+}
+.log {
+  display: flex;
+  gap: 16rpx;
+  padding-bottom: 22rpx;
+}
+.dot {
+  width: 14rpx;
+  height: 14rpx;
+  border-radius: 50%;
+  background: #2b6de5;
+  margin-top: 10rpx;
+  flex-shrink: 0;
+}
+.log-main {
+  flex: 1;
+}
+.log-title {
+  font-size: 27rpx;
+  color: #1f2329;
+  font-weight: 600;
+}
+.log-meta {
+  margin-top: 4rpx;
+  font-size: 23rpx;
+  color: #9aa0a8;
+}
+.tip {
+  font-size: 23rpx;
+  color: #9aa0a8;
+  text-align: center;
+  padding: 8rpx 0;
+}
+.footer-space {
+  height: 30rpx;
+}
+.actions {
+  display: flex;
+  gap: 16rpx;
+  padding: 16rpx 24rpx calc(16rpx + env(safe-area-inset-bottom));
+  background: #fff;
+  border-top: 1rpx solid #f0f0f0;
+}
+.btn {
+  flex: 1;
+  border-radius: 44rpx;
+  font-size: 30rpx;
+}
+.btn.primary {
+  background: #2b6de5;
+  color: #fff;
+}
+.btn.ghost {
+  background: #eef4ff;
+  color: #2b6de5;
+}
+.btn.disabled {
+  background: #f2f3f5;
+  color: #9aa0a8;
+}
+.retry {
+  background: #eef4ff;
+  color: #2b6de5;
+}

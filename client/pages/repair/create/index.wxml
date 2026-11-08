@@ -1,0 +1,83 @@
+<!--pages/repair/create/index.wxml-->
+<navigation-bar title="申请报修" back="{{true}}" color="black" background="#FFF"></navigation-bar>
+
+<scroll-view class="scroll" scroll-y type="list">
+  <view class="page">
+    <view wx:if="{{loading}}" class="state">加载中…</view>
+    <view wx:elif="{{error}}" class="state">
+      <text>{{error}}</text>
+      <button size="mini" class="retry" bindtap="goBack">返回</button>
+    </view>
+
+    <block wx:else>
+      <view class="panel">
+        <view class="house-title">{{contract ? contract.title : house.title}}</view>
+        <view class="meta" wx:if="{{contract}}">合同编号：{{contract.contractNo}}</view>
+        <view class="meta" wx:if="{{house}}">{{house.region}} · {{house.community}}</view>
+        <view class="meta" wx:if="{{house}}">{{house.address}}</view>
+      </view>
+
+      <view class="panel">
+        <view class="form-item">
+          <text class="label">报修分类</text>
+          <picker range="{{categories}}" range-key="label" value="{{categoryIndex}}" bindchange="onCategoryChange">
+            <view class="value">{{categories[categoryIndex].label}} ›</view>
+          </picker>
+        </view>
+        <view class="form-item">
+          <text class="label">紧急程度</text>
+          <radio-group class="radio-group" bindchange="onUrgencyChange">
+            <label class="radio"><radio value="NORMAL" checked="{{urgency === 'NORMAL'}}" color="#2b6de5" />普通</label>
+            <label class="radio"><radio value="URGENT" checked="{{urgency === 'URGENT'}}" color="#e54d42" />紧急</label>
+          </radio-group>
+        </view>
+        <view class="form-item">
+          <text class="label">标题</text>
+          <input class="input" maxlength="120" value="{{title}}" placeholder="如：厨房水管漏水" bindinput="onTitleInput" />
+        </view>
+        <view class="form-item textarea-item">
+          <text class="label">问题描述</text>
+          <textarea class="textarea" maxlength="2000" value="{{description}}" placeholder="请描述故障现象、位置与影响范围（至少 10 字）" bindinput="onDescriptionInput" />
+        </view>
+      </view>
+
+      <view class="panel">
+        <view class="section-title">现场图片（最多 6 张）</view>
+        <view class="images">
+          <view class="image-wrap" wx:for="{{images}}" wx:key="*this">
+            <image class="shot" src="{{item}}" mode="aspectFill" data-url="{{item}}" bindtap="previewImage" />
+            <view class="remove" data-index="{{index}}" bindtap="removeImage">×</view>
+          </view>
+          <view wx:if="{{images.length < maxImages}}" class="add" bindtap="chooseImage">
+            <text class="add-plus">+</text>
+            <text class="add-text">拍照/相册</text>
+          </view>
+        </view>
+        <view class="hint">图片保存在私有存储，仅本人与管理员可查看</view>
+      </view>
+
+      <view class="panel">
+        <view class="form-item">
+          <text class="label">联系电话</text>
+          <input class="input" type="number" maxlength="11" value="{{phone}}" placeholder="用于师傅联系您" bindinput="onPhoneInput" />
+        </view>
+        <view class="form-item">
+          <text class="label">期望日期</text>
+          <picker mode="date" value="{{date}}" start="{{minDate}}" end="{{maxDate}}" bindchange="onDateChange">
+            <view class="value">{{date}} ›</view>
+          </picker>
+        </view>
+        <view class="form-item">
+          <text class="label">期望时间</text>
+          <picker mode="time" value="{{time}}" start="08:00" end="20:00" bindchange="onTimeChange">
+            <view class="value">{{time}} ›</view>
+          </picker>
+        </view>
+      </view>
+
+      <view class="tip">提交后由经纪人受理并安排师傅；处理完成后请在本页确认关闭，问题未解决可重新打开。</view>
+
+      <button class="submit" loading="{{submitting}}" bindtap="submit">提交报修</button>
+    </block>
+  </view>
+</scroll-view>

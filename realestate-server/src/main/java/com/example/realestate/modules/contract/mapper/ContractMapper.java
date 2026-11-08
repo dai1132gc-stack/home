@@ -43,4 +43,13 @@ public interface ContractMapper extends BaseMapper<Contract> {
     /** 同一房源占用中的合同数量（PENDING_SIGN/ACTIVE），用于激活前复核 */
     long countOccupyingByHouse(@Param("houseId") Long houseId,
                                @Param("excludeId") Long excludeId);
+
+    /** 到期任务候选：ACTIVE 且 end_date < today（按到期日升序分批） */
+    List<Contract> selectExpiredCandidates(@Param("today") java.time.LocalDate today,
+                                           @Param("limit") int limit);
+
+    /** 幂等到期：仅 ACTIVE 且 end_date < today 时置 EXPIRED；返回 0 表示已被处理 */
+    int expireIfActive(@Param("id") Long id,
+                       @Param("today") java.time.LocalDate today,
+                       @Param("now") Instant now);
 }

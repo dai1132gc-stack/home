@@ -142,3 +142,11 @@ page {
   color: #fff;
   border: none;
 }
+.repair {
+  flex: 0 0 130rpx;
+  border-radius: 44rpx;
+  font-size: 28rpx;
+  background: #f2f3f5;
+  color: #4a515b;
+  border: none;
+}

@@ -54,6 +54,11 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/auth/login", "/api/v1/auth/refresh", "/api/v1/auth/logout").permitAll()
                         // W2：房源列表与详情对游客开放（Service 层强制只返回 PUBLISHED）；图片资源公开
                         .requestMatchers(HttpMethod.GET, "/api/v1/houses", "/api/v1/houses/*").permitAll()
+                        // W4：教程/公告/政策公开只读（Service 强制 PUBLISHED）；测算公开但限流
+                        .requestMatchers(HttpMethod.GET, "/api/v1/guides", "/api/v1/guides/*").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/policies", "/api/v1/policies/*").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/calculators/mortgage", "/api/v1/calculators/tax").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/calculators/config").permitAll()
                         .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
                         .requestMatchers("/actuator/health/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.realestate.modules.content.mapper.PolicyDocumentMapper">
+
+    <sql id="listColumns">
+        p.id, p.title, p.doc_no, p.doc_type, p.source, p.publish_date, p.effective_date,
+        p.status, p.version, p.created_at, p.updated_at,
+        (p.attachment_key IS NOT NULL) AS has_attachment
+    </sql>
+
+    <sql id="queryWhere">
+        WHERE p.deleted = 0
+        <choose>
+            <when test="publicOnly">
+                AND p.status = 'PUBLISHED'
+            </when>
+            <otherwise>
+                <if test="q.status != null and q.status != ''">
+                    AND p.status = #{q.status}
+                </if>
+            </otherwise>
+        </choose>
+        <if test="q.category != null and q.category != ''">
+            AND p.doc_type = #{q.category}
+        </if>
+        <if test="q.keyword != null and q.keyword != ''">
+            AND p.title LIKE CONCAT(#{q.keyword}, '%')
+        </if>
+    </sql>
+
+    <select id="selectPageList" resultType="com.example.realestate.modules.content.model.vo.PolicyListRow">
+        SELECT <include refid="listColumns"/>
+        FROM policy_document p
+        <include refid="queryWhere"/>
+        <choose>
+            <when test="publicOnly">
+                ORDER BY p.publish_date DESC, p.id DESC
+            </when>
+            <otherwise>
+                ORDER BY p.updated_at DESC, p.id DESC
+            </otherwise>
+        </choose>
+        LIMIT #{offset}, #{size}
+    </select>
+
+    <select id="countByQuery" resultType="long">
+        SELECT COUNT(*)
+        FROM policy_document p
+        <include refid="queryWhere"/>
+    </select>
+
+    <update id="publish">
+        UPDATE policy_document
+        SET status = 'PUBLISHED', version = version + 1, updated_at = #{now}
+        WHERE id = #{id} AND deleted = 0 AND status IN ('DRAFT', 'OFFLINE')
+    </update>
+
+    <update id="offline">
+        UPDATE policy_document
+        SET status = 'OFFLINE', version = version + 1, updated_at = #{now}
+        WHERE id = #{id} AND deleted = 0 AND status = 'PUBLISHED'
+    </update>
+
+    <update id="updateAttachment">
+        UPDATE policy_document
+        SET attachment_key = #{attachmentKey}, version = version + 1, updated_at = #{now}
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+</mapper>
