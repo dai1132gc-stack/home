@@ -221,11 +221,15 @@ async function apiLogin(username, password, clientType) {
   return body.data
 }
 
+let adminSession = null
 async function adminCall(path, method = 'GET', body) {
-  const login = await apiLogin('admin', ADMIN_PASSWORD, 'WEB')
+  // 复用管理员会话：避免每次 adminCall 都登录，触发新加的 IP 限流（10 次/分）
+  if (!adminSession) {
+    adminSession = await apiLogin('admin', ADMIN_PASSWORD, 'WEB')
+  }
   const res = await fetch(API + path, {
     method,
-    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + login.accessToken },
+    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + adminSession.accessToken },
     body: body ? JSON.stringify(body) : undefined,
   })
   return { status: res.status, body: await res.json() }

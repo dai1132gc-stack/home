@@ -6,6 +6,7 @@ import com.example.realestate.common.enums.ErrorCode;
 import com.example.realestate.common.exception.BusinessException;
 import com.example.realestate.config.AppProperties;
 import com.example.realestate.modules.auth.model.vo.LoginResponse;
+import com.example.realestate.modules.auth.service.AuthRateLimiter;
 import com.example.realestate.modules.auth.service.AuthService;
 import com.example.realestate.modules.auth.wechat.client.WechatMiniClient;
 import com.example.realestate.modules.auth.mapper.UserWechatBindingMapper;
@@ -38,26 +39,29 @@ public class WechatAuthServiceImpl implements WechatAuthService {
     private final SysUserMapper sysUserMapper;
     private final AuthService authService;
     private final AppProperties properties;
+    private final AuthRateLimiter authRateLimiter;
 
     public WechatAuthServiceImpl(WechatMiniClient wechatMiniClient,
                                  WechatUserRegistrar registrar,
                                  UserWechatBindingMapper bindingMapper,
                                  SysUserMapper sysUserMapper,
                                  AuthService authService,
-                                 AppProperties properties) {
+                                 AppProperties properties,
+                                 AuthRateLimiter authRateLimiter) {
         this.wechatMiniClient = wechatMiniClient;
         this.registrar = registrar;
         this.bindingMapper = bindingMapper;
         this.sysUserMapper = sysUserMapper;
         this.authService = authService;
         this.properties = properties;
+        this.authRateLimiter = authRateLimiter;
     }
 
     @Override
-    public LoginResponse login(WechatLoginRequest request) {
+    public LoginResponse login(WechatLoginRequest request, String clientIp) {
         long start = System.currentTimeMillis();
         try {
-            LoginResponse response = doLogin(request);
+            LoginResponse response = doLogin(request, clientIp);
             log.info("微信登录成功 userId={} client=MINI elapsedMs={}",
                     response.user().id(), System.currentTimeMillis() - start);
             return response;
@@ -70,7 +74,7 @@ public class WechatAuthServiceImpl implements WechatAuthService {
         }
     }
 
-    private LoginResponse doLogin(WechatLoginRequest request) {
+    private LoginResponse doLogin(WechatLoginRequest request, String clientIp) {
         if (request.clientType() != ClientType.MINI) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "微信登录仅支持小程序客户端");
         }
@@ -78,6 +82,8 @@ public class WechatAuthServiceImpl implements WechatAuthService {
             // 配置缺失属于部署状态，不是用户错误：明确 503 并提示降级账号密码登录
             throw new BusinessException(ErrorCode.WECHAT_NOT_CONFIGURED);
         }
+        // 限流（V6.0.1 F4）：在调用上游 jscode2session 之前计数，防放大
+        authRateLimiter.checkWechat(clientIp);
 
         WechatMiniClient.WechatSession session = wechatMiniClient.code2Session(request.code().trim());
         UserWechatBinding binding = findByOpenid(session.openid());

@@ -9,6 +9,7 @@ import com.example.realestate.modules.auth.convert.UserConvert;
 import com.example.realestate.modules.auth.model.dto.LoginRequest;
 import com.example.realestate.modules.auth.model.vo.LoginResponse;
 import com.example.realestate.modules.auth.model.vo.UserVO;
+import com.example.realestate.modules.auth.service.AuthRateLimiter;
 import com.example.realestate.modules.auth.service.AuthService;
 import com.example.realestate.modules.user.mapper.AuthLoginLogMapper;
 import com.example.realestate.modules.user.mapper.SysUserMapper;
@@ -46,6 +47,7 @@ public class AuthServiceImpl implements AuthService {
     private final RefreshTokenService refreshTokenService;
     private final UserConvert userConvert;
     private final AppProperties properties;
+    private final AuthRateLimiter authRateLimiter;
 
     public AuthServiceImpl(SysUserMapper sysUserMapper,
                            AuthLoginLogMapper loginLogMapper,
@@ -53,7 +55,8 @@ public class AuthServiceImpl implements AuthService {
                            JwtTokenProvider jwtTokenProvider,
                            RefreshTokenService refreshTokenService,
                            UserConvert userConvert,
-                           AppProperties properties) {
+                           AppProperties properties,
+                           AuthRateLimiter authRateLimiter) {
         this.sysUserMapper = sysUserMapper;
         this.loginLogMapper = loginLogMapper;
         this.passwordEncoder = passwordEncoder;
@@ -61,10 +64,14 @@ public class AuthServiceImpl implements AuthService {
         this.refreshTokenService = refreshTokenService;
         this.userConvert = userConvert;
         this.properties = properties;
+        this.authRateLimiter = authRateLimiter;
     }
 
     @Override
-    public LoginResponse login(LoginRequest request) {
+    public LoginResponse login(LoginRequest request, String clientIp) {
+        // 登录限流（V6.0.1 F4）：IP 统计所有尝试；用户名维度统计失败尝试，
+        // 成功登录清零该用户名的本分钟失败计数，避免正常重复登录被误伤
+        authRateLimiter.checkLogin(clientIp, request.username());
         SysUser user = sysUserMapper.selectOne(
                 Wrappers.<SysUser>lambdaQuery().eq(SysUser::getUsername, request.username()));
 
@@ -85,6 +92,7 @@ public class AuthServiceImpl implements AuthService {
 
         LoginUser loginUser = toLoginUser(user, request.clientType());
         LoginResponse response = issueTokens(user, request.clientType(), loginUser);
+        authRateLimiter.resetLoginFailures(request.username());
         audit(user.getId(), request.username(), request.clientType(), EVENT_LOGIN, true, null);
         log.info("登录成功 userId={} role={} client={}", user.getId(), user.getRole(), request.clientType());
         return response;

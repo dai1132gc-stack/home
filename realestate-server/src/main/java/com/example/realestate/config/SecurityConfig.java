@@ -3,8 +3,11 @@ package com.example.realestate.config;
 import com.example.realestate.security.SecurityJsonHandlers;
 import com.example.realestate.security.filter.JwtAuthenticationFilter;
 import com.example.realestate.security.jwt.JwtTokenProvider;
+import com.example.realestate.security.service.UserStatusService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -26,10 +29,15 @@ public class SecurityConfig {
 
     private final SecurityJsonHandlers securityJsonHandlers;
     private final JwtTokenProvider jwtTokenProvider;
+    private final UserStatusService userStatusService;
+    private final Environment environment;
 
-    public SecurityConfig(SecurityJsonHandlers securityJsonHandlers, JwtTokenProvider jwtTokenProvider) {
+    public SecurityConfig(SecurityJsonHandlers securityJsonHandlers, JwtTokenProvider jwtTokenProvider,
+                          UserStatusService userStatusService, Environment environment) {
         this.securityJsonHandlers = securityJsonHandlers;
         this.jwtTokenProvider = jwtTokenProvider;
+        this.userStatusService = userStatusService;
+        this.environment = environment;
     }
 
     @Bean
@@ -39,7 +47,7 @@ public class SecurityConfig {
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
-        return new JwtAuthenticationFilter(jwtTokenProvider);
+        return new JwtAuthenticationFilter(jwtTokenProvider, userStatusService);
     }
 
     @Bean
@@ -49,8 +57,8 @@ public class SecurityConfig {
                 .cors(cors -> {
                 }) // 复用 CorsConfig 注册的 CorsFilter bean（仅明确 Origin）
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                .authorizeHttpRequests(auth -> {
+                    auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/v1/auth/login", "/api/v1/auth/refresh", "/api/v1/auth/logout").permitAll()
                         // W5：微信 code 登录（未配置凭据时由 Service 返回 503，不绕过认证）
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/wechat-login").permitAll()
@@ -62,10 +70,14 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/calculators/mortgage", "/api/v1/calculators/tax").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/calculators/config").permitAll()
                         .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
-                        .requestMatchers("/actuator/health/**").permitAll()
-                        .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("/api/**").authenticated()
-                        .anyRequest().denyAll())
+                        .requestMatchers("/actuator/health/**").permitAll();
+                    // V6.0.1 F6：API 文档仅非 prod 放行；prod 由 springdoc 关闭 + Security 不放行双保险
+                    if (!environment.acceptsProfiles(Profiles.of("prod"))) {
+                        auth.requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll();
+                    }
+                    auth.requestMatchers("/api/**").authenticated()
+                        .anyRequest().denyAll();
+                })
                 .exceptionHandling(handling -> handling
                         .authenticationEntryPoint(securityJsonHandlers)
                         .accessDeniedHandler(securityJsonHandlers))

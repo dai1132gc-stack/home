@@ -3,6 +3,7 @@ package com.example.realestate.security.filter;
 import com.example.realestate.common.enums.ClientType;
 import com.example.realestate.security.jwt.JwtTokenProvider;
 import com.example.realestate.security.model.LoginUser;
+import com.example.realestate.security.service.UserStatusService;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -28,9 +29,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final String BEARER_PREFIX = "Bearer ";
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final UserStatusService userStatusService;
 
-    public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider) {
+    public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider,
+                                   UserStatusService userStatusService) {
         this.jwtTokenProvider = jwtTokenProvider;
+        this.userStatusService = userStatusService;
     }
 
     @Override
@@ -43,12 +47,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String token = header.substring(BEARER_PREFIX.length()).trim();
             try {
                 JwtTokenProvider.AccessClaims claims = jwtTokenProvider.parseAccessToken(token);
-                LoginUser loginUser = new LoginUser(
-                        claims.userId(), claims.username(), claims.role(), claims.client());
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(
-                                loginUser, null, List.of(new SimpleGrantedAuthority("ROLE_" + claims.role())));
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                // V6.0.1 F3：禁用账号/已删除账号的 Access Token 最迟 30 秒内失效
+                if (userStatusService.isActive(claims.userId())) {
+                    LoginUser loginUser = new LoginUser(
+                            claims.userId(), claims.username(), claims.role(), claims.client());
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(
+                                    loginUser, null, List.of(new SimpleGrantedAuthority("ROLE_" + claims.role())));
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                } else {
+                    log.info("拒绝非活跃账号的 Access Token userId={}", claims.userId());
+                }
             } catch (JwtException | IllegalArgumentException e) {
                 log.debug("Access Token 校验失败: {}", e.getMessage());
             }

@@ -49,6 +49,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -578,8 +580,30 @@ public class ContractServiceImpl implements ContractService {
         }
         byte[] pdf = pdfGenerator.generate(snapshot, contract.getContractNo(), contract.getTitle());
         String key = privateStorage.storePdf(pdf);
+        // V6.0.1 F5：仅对“本次新生成”的文件注册回滚清理；事务提交后保留，
+        // 回滚（如并发占用冲突）时删除，避免 uploads-private 累积孤儿文件。
+        registerRollbackCleanup(key);
         contractMapper.updatePdfUrl(contract.getId(), key, Instant.now());
         return key;
+    }
+
+    /** 事务上下文存在时注册回滚清理；无事务（如单测直接调用）保持原行为 */
+    private void registerRollbackCleanup(String key) {
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+            return;
+        }
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCompletion(int status) {
+                if (status != TransactionSynchronization.STATUS_COMMITTED) {
+                    try {
+                        privateStorage.delete(key);
+                    } catch (Exception e) {
+                        log.warn("回滚清理合同 PDF 失败 key={}", key, e);
+                    }
+                }
+            }
+        });
     }
 
     private ContractSnapshot parseSnapshot(String json) {

@@ -47,6 +47,8 @@ class AuthServiceImplTest {
     private AuthLoginLogMapper loginLogMapper;
     @Mock
     private RefreshTokenService refreshTokenService;
+    @Mock
+    private com.example.realestate.modules.auth.service.AuthRateLimiter authRateLimiter;
 
     private AuthServiceImpl authService;
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
@@ -62,6 +64,7 @@ class AuthServiceImplTest {
                         15, 7),
                 new AppProperties.Cors(List.of("http://localhost:5174")),
                 new AppProperties.Bootstrap(null, null),
+                null,
                 null);
 
         authService = new AuthServiceImpl(
@@ -71,7 +74,8 @@ class AuthServiceImplTest {
                 new JwtTokenProvider(properties),
                 refreshTokenService,
                 new UserConvertImpl(),
-                properties);
+                properties,
+                authRateLimiter);
 
         admin = new SysUser();
         admin.setId(1L);

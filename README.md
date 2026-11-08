@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-- 当前技术方案版本：**V6.0**（W5 小程序联调已完成并通过端到端验收；W1 见方案第 21 节，W2 第 22 节，W3 第 23 节，W4 第 24 节，W5 第 25 节）。
+- 当前技术方案版本：**V6.0.1**（W5 小程序联调已完成并通过端到端验收；V6.0.1 完成 W1～W5 审查修复 F1～F8，见方案 25.9 与 `docs/review-w1-w5.md`；W1 见方案第 21 节，W2 第 22 节，W3 第 23 节，W4 第 24 节，W5 第 25 节）。
 - 完整方案：[`技术方案.md`](../技术方案.md)。
 - W1 已交付三端工程：后端 `realestate-server`（Spring Boot 3.5.6 + JWT + Redis 会话）、Web `realestate-admin`（Vue 3 + TS）、小程序 `client`（原生，增量新增认证模块）。
 - W2 在此基础上新增：房源 CRUD 与状态机、条件筛选与排序（下推 SQL）、图片上传与媒体关联、房东/客源管理、客户收藏、数据权限隔离；Web 新增房源/客源页面，小程序新增房源列表/详情/收藏。
@@ -114,6 +114,7 @@ cp /d/graduate/home/client/config/env.example.js /d/graduate/home/client/config/
 | 小程序 | `client/config/env.js` 中配置开发 API Base URL；测试号 AppID 已在 project.config.json |
 | 文件阶段 | 公开媒体目录 `STORAGE_LOCAL_ROOT`（默认 `uploads`）；合同 PDF 私有目录 `STORAGE_PRIVATE_ROOT`（默认 `uploads-private`，不注册静态映射）；生产再配置 OSS |
 | 微信登录（W5） | 后端 `WECHAT_MINI_APP_ID`、`WECHAT_MINI_APP_SECRET`、`WECHAT_MINI_TIMEOUT_SECONDS`（默认 4）；未配置时微信登录返回 503，账号密码登录不受影响 |
+| Cookie（V6.0.1） | 后端 `APP_COOKIE_SECURE`：dev=false（http://localhost 可登录），prod 必须 true（仅 HTTPS 发送 Refresh Cookie）；Refresh Cookie 固定 HttpOnly + SameSite=Lax + Path=/api/v1/auth，前提是 Web 与 API 同站部署，跨站需另行评估 None+Secure |
 | AI 阶段 | 后端 AI Base URL、模型、API Key、超时与限额 |
 
 注意：
@@ -265,6 +266,7 @@ npm run lint
 - 客户不能读取他人合同、预约和报修。
 - 核心异常返回正确 HTTP 状态、统一响应和 traceId。
 - 请求日志不含密码、令牌、完整手机号或合同正文。
+- V6.0.1 安全口径：Refresh Token 轮换由 Redis Lua **单脚本原子完成“旧 token 标记 ROTATED + 新 token 写入 + 新 token 入会话族”**，同一 token 并发刷新恰 1 成功 1 401，败者撤销族后胜者新 token 必然失效（客户端必须单飞刷新）；禁用账号最迟 30 秒生效（`UserStatusService` 缓存 + 过滤器校验）；登录 IP 维度统计所有尝试（10 次/分）、用户名维度只统计失败（5 次/分，成功登录清零），微信登录按 IP 10 次/分，超限 429，Redis 故障 fail-open；`X-Forwarded-For` 仅在可信代理后可信；`JWT_REFRESH_SECRET` 为历史兼容/预留，不参与签名。
 
 ### 5.5 W2/W3/W4/W5 冒烟脚本（需后端、Web、Redis、MySQL 已启动）
 
@@ -289,6 +291,10 @@ node docs/mini-logic-smoke.mjs      # W2 浏览/收藏 + W3 预约/取消/合同
 node docs/mini-w4-flow.mjs          # W4 报修提交/图片上传/流转、内容政策、房贷与税费测算
 node docs/mini-w5-flow.mjs          # W5 微信未配置降级/模拟成功、账号密码登录、401 单飞刷新、
                                     #     弱网重试策略、上传下载鉴权、全流程页面与个人中心
+
+# 4) V6.0.1 认证加固（18 项）：F1 并发 200/401 + 胜者新 token 失效、F2 Cookie 属性、
+#    F4 IP 第 11 次 429 + 成功登录不误伤
+bash docs/smoke-auth-hardening.sh
 ```
 
 W5 真机与合法域名项无法自动化，清单与验收边界见 `docs/w5-device-checklist.md`；真实微信授权、jscode2session 与扫码项标注“待用户验证”，不得表述为真机通过。
@@ -358,7 +364,8 @@ W5 真机与合法域名项无法自动化，清单与验收边界见 `docs/w5-d
 | W2 房源与客源 | V3.0 |
 | W3 交易与合同 | V4.0 |
 | W4 租后服务与工具 | **V5.0** |
-| W5 小程序联调 | **V6.0（当前）** |
+| W5 小程序联调 | **V6.0** |
+| W1～W5 审查修复（F1～F8） | **V6.0.1（当前）** |
 | W6 智能增强 | V7.0 |
 | W7 测试与优化 | V8.0 |
 | W8 部署与论文材料 | V9.0 |

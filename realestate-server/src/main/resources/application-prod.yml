@@ -29,4 +29,9 @@ springdoc:
   api-docs:
     enabled: false
 
+# 生产 Web Refresh Cookie 必须仅经 HTTPS 发送（V6.0.1 F2）
+app:
+  cookie:
+    secure: ${APP_COOKIE_SECURE:true}
+
 # 生产密钥必须来自环境变量：AppProperties 启动校验拒绝空值/内置开发默认值

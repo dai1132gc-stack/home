@@ -18,6 +18,8 @@ spring:
       timeout: 3s
 
 # 开发环境默认 JWT 密钥（仅 dev；prod 启动校验会拒绝该默认值）
+# 注意（V6.0.1 F8）：refresh-secret 为历史兼容/预留配置——Refresh Token 已是不透明随机串
+# （Redis 只存 SHA-256 摘要），该密钥不参与任何签名/加密，勿误以为它在保护 Refresh Token。
 app:
   jwt:
     access-secret: ${JWT_ACCESS_SECRET:dev-only-access-secret-0123456789abcdef0123456789abcdef}

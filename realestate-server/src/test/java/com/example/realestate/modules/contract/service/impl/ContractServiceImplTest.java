@@ -278,6 +278,72 @@ class ContractServiceImplTest {
     }
 
     @Test
+    @DisplayName("F5：事务回滚时删除本次新生成的 PDF 文件")
+    void rollbackDeletesNewlyGeneratedPdf() {
+        Contract stored = contract(5L, "DRAFT", null);
+        when(contractMapper.selectById(5L)).thenReturn(stored);
+        when(contractMapper.countOccupyingByHouse(7L, 5L)).thenReturn(0L);
+        when(pdfGenerator.generate(any(), anyString(), anyString())).thenReturn("%PDF".getBytes());
+        when(privateStorage.storePdf(any())).thenReturn("contract/202611/new.pdf");
+        when(contractMapper.updateStatusIfMatch(eq(5L), eq("DRAFT"), eq("PENDING_SIGN"), any())).thenReturn(1);
+        stubDetail(stored);
+
+        org.springframework.transaction.support.TransactionSynchronizationManager.initSynchronization();
+        try {
+            service.submit(5L);
+            org.springframework.transaction.support.TransactionSynchronizationManager.getSynchronizations()
+                    .forEach(s -> s.afterCompletion(
+                            org.springframework.transaction.support.TransactionSynchronization.STATUS_ROLLED_BACK));
+            verify(privateStorage).delete("contract/202611/new.pdf");
+        } finally {
+            org.springframework.transaction.support.TransactionSynchronizationManager.clearSynchronization();
+        }
+    }
+
+    @Test
+    @DisplayName("F5：事务提交后保留新生成的 PDF 文件；复用既有文件不注册清理")
+    void commitKeepsGeneratedPdf() {
+        // 场景一：新生成 + 提交 → 不删除
+        Contract stored = contract(5L, "DRAFT", null);
+        when(contractMapper.selectById(5L)).thenReturn(stored);
+        when(contractMapper.countOccupyingByHouse(7L, 5L)).thenReturn(0L);
+        when(pdfGenerator.generate(any(), anyString(), anyString())).thenReturn("%PDF".getBytes());
+        when(privateStorage.storePdf(any())).thenReturn("contract/202611/new.pdf");
+        when(contractMapper.updateStatusIfMatch(eq(5L), eq("DRAFT"), eq("PENDING_SIGN"), any())).thenReturn(1);
+        stubDetail(stored);
+
+        org.springframework.transaction.support.TransactionSynchronizationManager.initSynchronization();
+        try {
+            service.submit(5L);
+            org.springframework.transaction.support.TransactionSynchronizationManager.getSynchronizations()
+                    .forEach(s -> s.afterCompletion(
+                            org.springframework.transaction.support.TransactionSynchronization.STATUS_COMMITTED));
+            verify(privateStorage, org.mockito.Mockito.never()).delete(anyString());
+        } finally {
+            org.springframework.transaction.support.TransactionSynchronizationManager.clearSynchronization();
+        }
+
+        // 场景二：复用既有 PDF（无新生成）→ 回滚也不删除旧文件
+        Contract withPdf = contract(6L, "DRAFT", "contract/old.pdf");
+        when(contractMapper.selectById(6L)).thenReturn(withPdf);
+        when(privateStorage.exists("contract/old.pdf")).thenReturn(true);
+        when(contractMapper.countOccupyingByHouse(7L, 6L)).thenReturn(0L);
+        when(contractMapper.updateStatusIfMatch(eq(6L), eq("DRAFT"), eq("PENDING_SIGN"), any())).thenReturn(1);
+        stubDetail(withPdf);
+
+        org.springframework.transaction.support.TransactionSynchronizationManager.initSynchronization();
+        try {
+            service.submit(6L);
+            org.springframework.transaction.support.TransactionSynchronizationManager.getSynchronizations()
+                    .forEach(s -> s.afterCompletion(
+                            org.springframework.transaction.support.TransactionSynchronization.STATUS_ROLLED_BACK));
+            verify(privateStorage, org.mockito.Mockito.never()).delete("contract/old.pdf");
+        } finally {
+            org.springframework.transaction.support.TransactionSynchronizationManager.clearSynchronization();
+        }
+    }
+
+    @Test
     @DisplayName("客户确认：非本人合同返回 404")
     void confirmOthersReturnsNotFound() {
         Contract stored = contract(5L, "PENDING_SIGN", "contract/a.pdf");

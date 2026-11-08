@@ -33,17 +33,40 @@ class JwtTokenProviderTest {
         AppProperties properties = new AppProperties(
                 new AppProperties.Jwt(ACCESS_SECRET, "another-refresh-secret-0123456789abcdef01234567", 15, 7),
                 new AppProperties.Cors(ORIGINS),
-                new AppProperties.Bootstrap(null, null), null);
+                new AppProperties.Bootstrap(null, null), null, null);
         provider = new JwtTokenProvider(properties);
         // TTL 1 分钟的 provider，用于构造过期场景验证
         expiredProvider = new JwtTokenProvider(new AppProperties(
                 new AppProperties.Jwt(ACCESS_SECRET, "another-refresh-secret-0123456789abcdef01234567", 1, 7),
                 new AppProperties.Cors(ORIGINS),
-                new AppProperties.Bootstrap(null, null), null));
+                new AppProperties.Bootstrap(null, null), null, null));
     }
 
     private LoginUser user() {
         return new LoginUser(42L, "admin", "ADMIN", ClientType.WEB);
+    }
+
+    @Test
+    @DisplayName("F7：签名算法按密钥长度自动选择（32B→HS256、48B→HS384、64B→HS512）")
+    void algorithmFollowsKeyLength() throws Exception {
+        assertThat(algOf(providerWithSecret("a".repeat(32)))).isEqualTo("HS256");
+        assertThat(algOf(providerWithSecret("a".repeat(48)))).isEqualTo("HS384");
+        assertThat(algOf(providerWithSecret("a".repeat(64)))).isEqualTo("HS512");
+    }
+
+    private JwtTokenProvider providerWithSecret(String secret) {
+        return new JwtTokenProvider(new AppProperties(
+                new AppProperties.Jwt(secret, "another-refresh-secret-0123456789abcdef01234567", 15, 7),
+                new AppProperties.Cors(ORIGINS),
+                new AppProperties.Bootstrap(null, null), null, null));
+    }
+
+    /** 解析 JWT 头部 alg 字段（Base64URL 解码，不验签） */
+    private String algOf(JwtTokenProvider p) throws Exception {
+        String token = p.generateAccessToken(user());
+        String headerJson = new String(
+                java.util.Base64.getUrlDecoder().decode(token.split("\\.")[0]), StandardCharsets.UTF_8);
+        return headerJson.replaceAll(".*\"alg\"\\s*:\\s*\"([^\"]+)\".*", "$1");
     }
 
     @Test
@@ -97,7 +120,7 @@ class JwtTokenProviderTest {
         AppProperties bad = new AppProperties(
                 new AppProperties.Jwt("short", "another-refresh-secret-0123456789abcdef01234567", 15, 7),
                 new AppProperties.Cors(ORIGINS),
-                new AppProperties.Bootstrap(null, null), null);
+                new AppProperties.Bootstrap(null, null), null, null);
         assertThatThrownBy(() -> new JwtTokenProvider(bad))
                 .isInstanceOf(IllegalStateException.class);
     }

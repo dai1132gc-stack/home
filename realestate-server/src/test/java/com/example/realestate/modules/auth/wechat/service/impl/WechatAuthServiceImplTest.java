@@ -57,6 +57,8 @@ class WechatAuthServiceImplTest {
     private SysUserMapper sysUserMapper;
     @Mock
     private AuthService authService;
+    @Mock
+    private com.example.realestate.modules.auth.service.AuthRateLimiter authRateLimiter;
 
     private WechatAuthServiceImpl service;
     private SysUser customer;
@@ -65,7 +67,7 @@ class WechatAuthServiceImplTest {
     void setUp() {
         service = new WechatAuthServiceImpl(
                 wechatMiniClient, registrar, bindingMapper, sysUserMapper, authService,
-                properties(true));
+                properties(true), authRateLimiter);
 
         customer = new SysUser();
         customer.setId(9L);
@@ -90,7 +92,8 @@ class WechatAuthServiceImplTest {
                 new AppProperties.Wechat(
                         configured ? "wx-test-appid" : "",
                         configured ? "test-secret-not-real" : "",
-                        4, "https://api.weixin.qq.com"));
+                        4, "https://api.weixin.qq.com"),
+                null);
     }
 
     private LoginResponse tokenResponse(Long userId) {
@@ -155,7 +158,8 @@ class WechatAuthServiceImplTest {
     @DisplayName("未配置 AppID/AppSecret：503 + AUTH_50301，且不调用微信接口")
     void notConfiguredReturns503() {
         WechatAuthServiceImpl unconfigured = new WechatAuthServiceImpl(
-                wechatMiniClient, registrar, bindingMapper, sysUserMapper, authService, properties(false));
+                wechatMiniClient, registrar, bindingMapper, sysUserMapper, authService,
+                properties(false), authRateLimiter);
 
         assertThatThrownBy(() -> unconfigured.login(request()))
                 .isInstanceOf(BusinessException.class)

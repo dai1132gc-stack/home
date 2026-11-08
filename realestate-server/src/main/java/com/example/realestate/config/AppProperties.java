@@ -17,7 +17,8 @@ public record AppProperties(
         @Valid Jwt jwt,
         @Valid Cors cors,
         @Valid Bootstrap bootstrap,
-        @Valid Wechat wechat
+        @Valid Wechat wechat,
+        @Valid Cookie cookie
 ) {
 
     /** prod 下禁止使用的内置开发默认密钥前缀（见 application-dev.yml / application-test.yml） */
@@ -31,8 +32,30 @@ public record AppProperties(
         if (wechat == null) {
             wechat = new Wechat(null, null, DEFAULT_WECHAT_TIMEOUT_SECONDS, DEFAULT_WECHAT_API_BASE_URL);
         }
+        if (cookie == null) {
+            cookie = new Cookie(false);
+        }
     }
 
+    /**
+     * Web Refresh Cookie 属性（V6.0.1 修复 F2）。
+     * secure 由环境变量驱动：dev=false（http://localhost 可登录），prod=true（仅 HTTPS 发送）。
+     * SameSite 固定 Lax：前提是 Web 与 API 同站部署（同 registrable domain）；
+     * 跨站部署需改为 None + Secure 并同步评估 CORS/CSRF（见技术方案 21.2）。
+     */
+    @Validated
+    @ConfigurationProperties(prefix = "app.cookie")
+    public record Cookie(
+            boolean secure
+    ) {
+    }
+
+    /**
+     * JWT 配置。accessSecret 用于 Access Token 签名（算法按密钥长度自动选择
+     * HS256/384/512，≥32 字节，见技术方案 21.2 V6.0.1 修订）。
+     * refreshSecret 为历史兼容/预留（V6.0.1 F8）：Refresh Token 已是不透明随机串 +
+     * Redis 哈希会话，该密钥不参与任何签名/加密；保留仅为兼容既有 .env 与启动校验。
+     */
     @Validated
     @ConfigurationProperties(prefix = "app.jwt")
     public record Jwt(

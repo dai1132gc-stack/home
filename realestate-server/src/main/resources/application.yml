@@ -44,6 +44,9 @@ app:
     refresh-ttl-days: ${JWT_REFRESH_TTL_DAYS:7}
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5174}
+  cookie:
+    # Web Refresh Cookie 的 Secure 属性：dev=false（http://localhost 可登录），prod 必须 true（仅 HTTPS）
+    secure: ${APP_COOKIE_SECURE:false}
   bootstrap:
     admin-password: ${BOOTSTRAP_ADMIN_PASSWORD:}
     customer-password: ${BOOTSTRAP_CUSTOMER_PASSWORD:}
