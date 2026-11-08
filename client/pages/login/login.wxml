@@ -1,0 +1,17 @@
+<!--pages/login/login.wxml-->
+<navigation-bar title="登录" back="{{true}}" color="black" background="#FFF"></navigation-bar>
+<scroll-view class="scrollarea" scroll-y type="list">
+  <view class="login-wrap">
+    <view class="brand">房产中介 · 客户端</view>
+    <view class="field">
+      <view class="label">用户名</view>
+      <input class="input" value="{{username}}" bindinput="onUsernameInput" placeholder="请输入用户名" />
+    </view>
+    <view class="field">
+      <view class="label">密码</view>
+      <input class="input" value="{{password}}" password bindinput="onPasswordInput" placeholder="请输入密码" />
+    </view>
+    <button class="submit" type="primary" loading="{{loading}}" bindtap="handleLogin">登 录</button>
+    <view class="hint">W1 测试号阶段使用账号密码登录，微信 code 登录待正式 AppID 配置后启用</view>
+  </view>
+</scroll-view>

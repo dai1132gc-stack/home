@@ -1,0 +1,42 @@
+MySQL root 密码重置步骤（Windows，--init-file 方式）
+=====================================================
+
+【前提】需要 Windows 管理员权限。请"以管理员身份运行" PowerShell。
+
+【第 1 步】编辑重置脚本
+  打开 D:\graduate\home\docs\init-reset.sql
+  把 <请替换为你的新root密码> 改成您的新 root 密码（例如 Root@2026）
+  保存。注意密码不要在聊天中发送。
+
+【第 2 步】在管理员 PowerShell 中停止 MySQL 服务
+  net stop MySQL80
+
+【第 3 步】用 --init-file 启动 mysqld 执行重置
+  & "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysqld.exe" `
+      --defaults-file="C:\ProgramData\MySQL\MySQL Server 8.0\my.ini" `
+      --init-file="D:\graduate\home\docs\init-reset.sql" `
+      --console
+
+  说明：该命令会启动 MySQL、执行 init-reset.sql 改密码，然后继续运行。
+  看到 "ready for connections" 后，说明密码已重置成功。
+  按 Ctrl+C 停止这个 mysqld 进程（它会优雅关闭）。
+
+【第 4 步】启动 MySQL 服务
+  net start MySQL80
+
+【第 5 步】验证新密码
+  mysql -u root -p
+  输入新密码，能看到 mysql> 提示符即成功。
+
+【第 6 步】执行 W1 数据库初始化
+  编辑 D:\graduate\home\docs\init-db.sql，把 <请替换为你的开发密码> 改成
+  realestate_dev 账号的密码（可以和 root 不同，例如 MyDev@2026）。
+  然后执行：
+  mysql -u root -p < D:\graduate\home\docs\init-db.sql
+  （输入第 3 步设的 root 新密码）
+
+【第 7 步】把开发密码填入后端 .env
+  编辑 D:\graduate\home\realestate-server\.env
+  把 DB_PASSWORD=changeme 改成第 6 步设的 realestate_dev 密码。
+
+【完成后】回复"数据库已就绪"，我立即启动后端联调。

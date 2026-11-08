@@ -1,0 +1,14 @@
+<!--pages/profile/profile.wxml-->
+<navigation-bar title="个人中心" back="{{true}}" color="black" background="#FFF"></navigation-bar>
+<scroll-view class="scrollarea" scroll-y type="list">
+  <view class="profile-wrap">
+    <view wx:if="{{user}}" class="card">
+      <view class="row"><text class="k">用户名</text><text class="v">{{user.username}}</text></view>
+      <view class="row"><text class="k">昵称</text><text class="v">{{user.nickname || '-'}}</text></view>
+      <view class="row"><text class="k">角色</text><text class="v">{{user.role}}</text></view>
+      <view class="row"><text class="k">状态</text><text class="v">{{user.status}}</text></view>
+    </view>
+    <view wx:else class="empty">加载中…</view>
+    <button class="logout" type="warn" bindtap="handleLogout">退出登录</button>
+  </view>
+</scroll-view>

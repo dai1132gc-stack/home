@@ -1,0 +1,28 @@
+spring:
+  config:
+    activate:
+      on-profile: test
+  datasource:
+    url: ${DB_URL:jdbc:mysql://127.0.0.1:3306/realestate_test?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true}
+    username: ${DB_USERNAME:realestate_dev}
+    password: ${DB_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  data:
+    redis:
+      host: ${REDIS_HOST:127.0.0.1}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      database: ${REDIS_DATABASE:1}
+
+app:
+  jwt:
+    access-secret: ${JWT_ACCESS_SECRET:test-only-access-secret-0123456789abcdef0123456789abcdef}
+    refresh-secret: ${JWT_REFRESH_SECRET:test-only-refresh-secret-0123456789abcdef0123456789abcdef}
+
+logging:
+  level:
+    root: INFO
+
+springdoc:
+  swagger-ui:
+    enabled: false

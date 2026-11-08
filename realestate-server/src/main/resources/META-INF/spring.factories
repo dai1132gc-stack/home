@@ -1,0 +1,3 @@
+# EnvironmentPostProcessor 注册（读取本地 .env）
+org.springframework.boot.env.EnvironmentPostProcessor=\
+  com.example.realestate.config.DotEnvEnvironmentPostProcessor

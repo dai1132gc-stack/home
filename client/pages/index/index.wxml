@@ -1,0 +1,23 @@
+<!--index.wxml-->
+<navigation-bar title="房产中介" back="{{false}}" color="black" background="#FFF"></navigation-bar>
+<scroll-view class="scrollarea" scroll-y type="list">
+  <view class="container">
+    <view class="title">房产中介管理系统</view>
+    <view class="subtitle">小程序端 · 客户</view>
+
+    <view wx:if="{{loading}}" class="status">正在恢复会话…</view>
+
+    <block wx:elif="{{loggedIn}}">
+      <view class="status">
+        <text>已登录：{{user.nickname || user.username}}</text>
+      </view>
+      <view class="role">角色：{{user.role}}</view>
+      <button class="btn" bindtap="goProfile" type="primary">进入个人中心</button>
+    </block>
+
+    <block wx:else>
+      <view class="status">未登录</view>
+      <button class="btn" bindtap="goLogin" type="primary">账号密码登录</button>
+    </block>
+  </view>
+</scroll-view>

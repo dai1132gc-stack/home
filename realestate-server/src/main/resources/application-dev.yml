@@ -1,0 +1,33 @@
+spring:
+  config:
+    activate:
+      on-profile: dev
+  datasource:
+    url: ${DB_URL:jdbc:mysql://127.0.0.1:3306/realestate?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true}
+    username: ${DB_USERNAME:realestate_dev}
+    password: ${DB_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: ${DB_POOL_MAX_SIZE:10}
+  data:
+    redis:
+      host: ${REDIS_HOST:127.0.0.1}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      database: ${REDIS_DATABASE:0}
+      timeout: 3s
+
+# 开发环境默认 JWT 密钥（仅 dev；prod 启动校验会拒绝该默认值）
+app:
+  jwt:
+    access-secret: ${JWT_ACCESS_SECRET:dev-only-access-secret-0123456789abcdef0123456789abcdef}
+    refresh-secret: ${JWT_REFRESH_SECRET:dev-only-refresh-secret-0123456789abcdef0123456789abcdef}
+
+logging:
+  level:
+    root: ${LOG_LEVEL_ROOT:INFO}
+    com.example.realestate: DEBUG
+
+springdoc:
+  swagger-ui:
+    enabled: true
