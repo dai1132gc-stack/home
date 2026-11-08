@@ -113,9 +113,11 @@ onMounted(load)
           <el-input v-model="filters.keyword" placeholder="标题/小区前缀" clearable style="width: 160px" />
         </el-form-item>
         <el-form-item label="状态">
-          <el-select v-model="filters.status" placeholder="全部" clearable style="width: 120px">
+          <el-select v-model="filters.status" placeholder="全部" clearable style="width: 130px">
             <el-option label="待发布" value="PENDING" />
             <el-option label="已发布" value="PUBLISHED" />
+            <el-option label="已预定" value="RESERVED" />
+            <el-option label="已签约" value="CONTRACTED" />
             <el-option label="已下架" value="OFFLINE" />
           </el-select>
         </el-form-item>

@@ -204,13 +204,16 @@ public class HouseServiceImpl implements HouseService {
     @Override
     @Transactional
     public HouseDetailVO publish(Long id) {
-        return changeStatus(id, HouseStatus.PUBLISHED);
+        // W3：RESERVED/CONTRACTED 由预约/合同联动，ADMIN 发布仅用于 PENDING/OFFLINE
+        return changeStatus(id, HouseStatus.PUBLISHED,
+                Set.of(HouseStatus.PENDING, HouseStatus.OFFLINE));
     }
 
     @Override
     @Transactional
     public HouseDetailVO offline(Long id) {
-        return changeStatus(id, HouseStatus.OFFLINE);
+        // RESERVED/CONTRACTED 需先取消预约或终止合同，不能直接下架
+        return changeStatus(id, HouseStatus.OFFLINE, Set.of(HouseStatus.PUBLISHED));
     }
 
     @Override
@@ -253,11 +256,14 @@ public class HouseServiceImpl implements HouseService {
 
     // ---------- 内部方法 ----------
 
-    /** 状态迁移：校验状态机 → 乐观锁更新 → 冲突返回 409 */
-    private HouseDetailVO changeStatus(Long id, HouseStatus target) {
+    /** 状态迁移：校验来源状态 + 状态机 → 乐观锁更新 → 冲突返回 409 */
+    private HouseDetailVO changeStatus(Long id, HouseStatus target, Set<HouseStatus> allowedFrom) {
         House house = requireHouse(id);
         HouseStatus current = HouseStatus.of(house.getStatus());
-        if (current == null || !current.canTransitionTo(target)) {
+        boolean allowed = current != null
+                && allowedFrom.contains(current)
+                && current.canTransitionTo(target);
+        if (!allowed) {
             throw new BusinessException(ErrorCode.CONFLICT,
                     "房源当前状态 " + house.getStatus() + " 不允许变更为 " + target.name());
         }

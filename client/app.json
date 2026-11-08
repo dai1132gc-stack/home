@@ -4,7 +4,11 @@
     "pages/login/login",
     "pages/profile/profile",
     "pages/house/list/index",
-    "pages/house/detail/index"
+    "pages/house/detail/index",
+    "pages/appointment/create/index",
+    "pages/appointment/list/index",
+    "pages/contract/list/index",
+    "pages/contract/detail/index"
   ],
   "window": {
     "navigationBarTextStyle": "black",

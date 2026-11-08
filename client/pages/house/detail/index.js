@@ -85,4 +85,16 @@ Page({
   goBack() {
     wx.navigateBack({ delta: 1 })
   },
+
+  /** W3：预约看房，未登录先跳登录 */
+  goAppointment() {
+    if (!getAccessToken()) {
+      wx.showToast({ title: '请先登录', icon: 'none' })
+      setTimeout(() => {
+        wx.navigateTo({ url: '/pages/login/login' })
+      }, 600)
+      return
+    }
+    wx.navigateTo({ url: '/pages/appointment/create/index?id=' + this.data.id })
+  },
 })

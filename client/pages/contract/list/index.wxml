@@ -1,0 +1,48 @@
+<!--pages/contract/list/index.wxml-->
+<navigation-bar title="我的合同" back="{{true}}" color="black" background="#FFF"></navigation-bar>
+
+<view class="page">
+  <view class="tabs">
+    <view
+      wx:for="{{tabs}}"
+      wx:key="value"
+      class="tab {{status === item.value ? 'active' : ''}}"
+      data-status="{{item.value}}"
+      bindtap="switchStatus"
+    >{{item.label}}</view>
+  </view>
+
+  <scroll-view class="list" scroll-y type="list" bindscrolltolower="onScrollToLower" lower-threshold="120">
+    <view wx:if="{{!loggedIn}}" class="empty">
+      <text>登录后查看合同</text>
+      <button size="mini" class="retry" bindtap="goLogin">去登录</button>
+    </view>
+
+    <view wx:elif="{{error}}" class="empty">
+      <text>{{error}}</text>
+    </view>
+
+    <view wx:elif="{{items.length === 0 && !loading}}" class="empty">
+      <text>暂无合同</text>
+    </view>
+
+    <view class="card" wx:for="{{items}}" wx:key="id" data-id="{{item.id}}" bindtap="goDetail">
+      <view class="row">
+        <text class="no">{{item.contractNo}}</text>
+        <text class="status status-{{item.status}}">{{item.statusText}}</text>
+      </view>
+      <view class="title">{{item.title}}</view>
+      <view class="meta">{{item.houseTitle}}</view>
+      <view class="meta">租期：{{item.periodText}}</view>
+      <view class="bottom">
+        <text class="amount">{{item.amountText}}<text class="unit">/期</text></text>
+        <text class="sign" wx:if="{{item.needSign}}">待确认签署 ›</text>
+        <text class="muted" wx:else>押金 {{item.depositText}}</text>
+      </view>
+    </view>
+
+    <view class="loading" wx:if="{{loading}}">加载中…</view>
+    <view class="loading" wx:elif="{{finished && items.length > 0}}">没有更多了</view>
+    <view class="footer-space"></view>
+  </scroll-view>
+</view>

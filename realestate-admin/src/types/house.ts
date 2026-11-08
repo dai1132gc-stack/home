@@ -1,7 +1,7 @@
 import type { PageParams } from '@/types/api'
 
 export type HouseType = 'RENT' | 'SALE'
-export type HouseStatus = 'PENDING' | 'PUBLISHED' | 'OFFLINE'
+export type HouseStatus = 'PENDING' | 'PUBLISHED' | 'RESERVED' | 'CONTRACTED' | 'OFFLINE'
 
 export interface HouseMedia {
   id: number

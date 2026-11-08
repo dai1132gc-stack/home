@@ -116,11 +116,14 @@ page {
   height: 40rpx;
 }
 .actions {
+  display: flex;
+  gap: 16rpx;
   padding: 16rpx 24rpx calc(16rpx + env(safe-area-inset-bottom));
   background: #fff;
   border-top: 1rpx solid #f0f0f0;
 }
 .fav {
+  flex: 1;
   border-radius: 44rpx;
   font-size: 30rpx;
   background: #eef4ff;
@@ -130,4 +133,12 @@ page {
 .fav.on {
   background: #2b6de5;
   color: #fff;
+}
+.book {
+  flex: 1;
+  border-radius: 44rpx;
+  font-size: 30rpx;
+  background: #ff6a00;
+  color: #fff;
+  border: none;
 }

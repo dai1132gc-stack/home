@@ -56,4 +56,24 @@
         <include refid="queryWhere"/>
     </select>
 
+    <!-- 事务内锁定房源行；逻辑删除条件手写，避免自定义 SQL 绕过 @TableLogic -->
+    <select id="selectByIdForUpdate" resultType="com.example.realestate.modules.house.model.entity.House">
+        SELECT id, title, house_type, status, community, region, address, price, area,
+               rooms, bathrooms, floor, description, owner_id, version, deleted, created_at, updated_at
+        FROM house
+        WHERE id = #{id} AND deleted = 0
+        FOR UPDATE
+    </select>
+
+    <!-- 状态联动：条件更新 + 版本自增，影响行数为 0 表示状态已变化（调用方返回 409） -->
+    <update id="updateStatusIfMatch">
+        UPDATE house
+        SET status = #{target}, version = version + 1, updated_at = #{now}
+        WHERE id = #{id} AND deleted = 0
+        AND status IN
+        <foreach collection="expectedStatuses" item="s" open="(" separator="," close=")">
+            #{s}
+        </foreach>
+    </update>
+
 </mapper>

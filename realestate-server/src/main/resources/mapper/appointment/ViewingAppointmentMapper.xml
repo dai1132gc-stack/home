@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.realestate.modules.appointment.mapper.ViewingAppointmentMapper">
+
+    <sql id="voColumns">
+        a.id, a.house_id, a.customer_id, a.preferred_time, a.contact_phone, a.remark,
+        a.status, a.created_at, a.updated_at,
+        h.title AS house_title, h.community AS house_community, h.region AS house_region,
+        u.nickname AS customer_name, u.username AS customer_username
+    </sql>
+
+    <!-- 数据权限 forcedCustomerId 由 Service 按角色注入；条件与分页同一条 SQL -->
+    <sql id="queryWhere">
+        WHERE a.deleted = 0
+        <if test="forcedCustomerId != null">
+            AND a.customer_id = #{forcedCustomerId}
+        </if>
+        <if test="q.customerId != null">
+            AND a.customer_id = #{q.customerId}
+        </if>
+        <if test="q.houseId != null">
+            AND a.house_id = #{q.houseId}
+        </if>
+        <if test="q.status != null and q.status != ''">
+            AND a.status = #{q.status}
+        </if>
+        <if test="q.fromTime != null">
+            AND a.preferred_time &gt;= #{q.fromTime}
+        </if>
+        <if test="q.toTime != null">
+            AND a.preferred_time &lt;= #{q.toTime}
+        </if>
+    </sql>
+
+    <select id="selectPageList" resultType="com.example.realestate.modules.appointment.model.vo.AppointmentVO">
+        SELECT <include refid="voColumns"/>
+        FROM viewing_appointment a
+        LEFT JOIN house h ON h.id = a.house_id
+        LEFT JOIN sys_user u ON u.id = a.customer_id
+        <include refid="queryWhere"/>
+        ORDER BY a.preferred_time DESC, a.id DESC
+        LIMIT #{offset}, #{size}
+    </select>
+
+    <select id="countByQuery" resultType="long">
+        SELECT COUNT(*)
+        FROM viewing_appointment a
+        <include refid="queryWhere"/>
+    </select>
+
+    <select id="selectVoById" resultType="com.example.realestate.modules.appointment.model.vo.AppointmentVO">
+        SELECT <include refid="voColumns"/>
+        FROM viewing_appointment a
+        LEFT JOIN house h ON h.id = a.house_id
+        LEFT JOIN sys_user u ON u.id = a.customer_id
+        WHERE a.deleted = 0 AND a.id = #{id}
+    </select>
+
+    <update id="updateStatusIfMatch">
+        UPDATE viewing_appointment
+        SET status = #{target}, version = version + 1, updated_at = #{now}
+        WHERE id = #{id} AND deleted = 0 AND status = #{expected}
+    </update>
+
+    <select id="countConfirmedByHouse" resultType="long">
+        SELECT COUNT(*)
+        FROM viewing_appointment
+        WHERE house_id = #{houseId}
+          AND status = 'CONFIRMED'
+          AND deleted = 0
+        <if test="excludeId != null">
+            AND id &lt;&gt; #{excludeId}
+        </if>
+    </select>
+
+</mapper>

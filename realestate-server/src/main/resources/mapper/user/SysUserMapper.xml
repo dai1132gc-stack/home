@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.realestate.modules.user.mapper.SysUserMapper">
+
+    <sql id="customerWhere">
+        WHERE role = 'CUSTOMER'
+        <if test="q.keyword != null and q.keyword != ''">
+            AND (username LIKE CONCAT(#{q.keyword}, '%') OR nickname LIKE CONCAT(#{q.keyword}, '%'))
+        </if>
+    </sql>
+
+    <select id="selectCustomers" resultType="com.example.realestate.modules.user.model.vo.CustomerVO">
+        SELECT id, username, nickname, phone, status, created_at
+        FROM sys_user
+        <include refid="customerWhere"/>
+        ORDER BY id DESC
+        LIMIT #{offset}, #{size}
+    </select>
+
+    <select id="countCustomers" resultType="long">
+        SELECT COUNT(*)
+        FROM sys_user
+        <include refid="customerWhere"/>
+    </select>
+
+</mapper>

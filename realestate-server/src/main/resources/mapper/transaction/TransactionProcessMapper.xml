@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.realestate.modules.transaction.mapper.TransactionProcessMapper">
+
+    <select id="selectByContract" resultType="com.example.realestate.modules.transaction.model.entity.TransactionProcess">
+        SELECT id, contract_id, node, status, done_at, remark, created_at, updated_at
+        FROM transaction_process
+        WHERE contract_id = #{contractId}
+        ORDER BY FIELD(node, 'DEPOSIT', 'SIGN', 'HANDOVER'), id
+    </select>
+
+    <update id="updateStatusIfMatch">
+        UPDATE transaction_process
+        SET status = #{target}, done_at = #{doneAt}, remark = #{remark}, updated_at = #{now}
+        WHERE id = #{id} AND status = #{expected}
+    </update>
+
+</mapper>

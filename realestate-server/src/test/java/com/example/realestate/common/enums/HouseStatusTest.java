@@ -17,11 +17,33 @@ class HouseStatusTest {
     }
 
     @Test
-    @DisplayName("PUBLISHED 只能下架")
+    @DisplayName("PUBLISHED 可下架或进入预定/签约，不能回到 PENDING")
     void publishedCanOnlyOffline() {
         assertThat(HouseStatus.PUBLISHED.canTransitionTo(HouseStatus.OFFLINE)).isTrue();
+        assertThat(HouseStatus.PUBLISHED.canTransitionTo(HouseStatus.RESERVED)).isTrue();
+        assertThat(HouseStatus.PUBLISHED.canTransitionTo(HouseStatus.CONTRACTED)).isTrue();
         assertThat(HouseStatus.PUBLISHED.canTransitionTo(HouseStatus.PUBLISHED)).isFalse();
         assertThat(HouseStatus.PUBLISHED.canTransitionTo(HouseStatus.PENDING)).isFalse();
+    }
+
+    @Test
+    @DisplayName("RESERVED 可回到 PUBLISHED 或签约，CONTRACTED 终止后回到 PUBLISHED")
+    void reservedAndContractedTransitions() {
+        assertThat(HouseStatus.RESERVED.canTransitionTo(HouseStatus.PUBLISHED)).isTrue();
+        assertThat(HouseStatus.RESERVED.canTransitionTo(HouseStatus.CONTRACTED)).isTrue();
+        assertThat(HouseStatus.RESERVED.canTransitionTo(HouseStatus.OFFLINE)).isFalse();
+        assertThat(HouseStatus.CONTRACTED.canTransitionTo(HouseStatus.PUBLISHED)).isTrue();
+        assertThat(HouseStatus.CONTRACTED.canTransitionTo(HouseStatus.RESERVED)).isFalse();
+        assertThat(HouseStatus.CONTRACTED.canTransitionTo(HouseStatus.OFFLINE)).isFalse();
+    }
+
+    @Test
+    @DisplayName("只有 PUBLISHED 对外可见")
+    void onlyPublishedIsPublic() {
+        assertThat(HouseStatus.PUBLISHED.isPubliclyVisible()).isTrue();
+        assertThat(HouseStatus.RESERVED.isPubliclyVisible()).isFalse();
+        assertThat(HouseStatus.CONTRACTED.isPubliclyVisible()).isFalse();
+        assertThat(HouseStatus.OFFLINE.isPubliclyVisible()).isFalse();
     }
 
     @Test

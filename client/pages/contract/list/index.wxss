@@ -1,0 +1,131 @@
+/**pages/contract/list/index.wxss**/
+page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #f5f6f8;
+}
+.page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.tabs {
+  display: flex;
+  background: #fff;
+  padding: 8rpx 12rpx;
+  gap: 8rpx;
+}
+.tab {
+  flex: 1;
+  text-align: center;
+  font-size: 27rpx;
+  color: #6b7280;
+  padding: 14rpx 0;
+  border-radius: 12rpx;
+}
+.tab.active {
+  color: #2b6de5;
+  background: #eef4ff;
+  font-weight: 600;
+}
+.list {
+  flex: 1;
+  height: 0;
+  padding: 20rpx 24rpx 0;
+  box-sizing: border-box;
+}
+.empty {
+  padding-top: 160rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24rpx;
+  color: #8a9099;
+  font-size: 27rpx;
+}
+.card {
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 26rpx;
+  margin-bottom: 20rpx;
+}
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+.no {
+  font-size: 24rpx;
+  color: #7b828c;
+}
+.status {
+  font-size: 22rpx;
+  padding: 4rpx 14rpx;
+  border-radius: 8rpx;
+  background: #f2f3f5;
+  color: #6b7280;
+}
+.status-PENDING_SIGN {
+  background: #fff7e8;
+  color: #b26a00;
+}
+.status-ACTIVE {
+  background: #eaf7ee;
+  color: #1a7f37;
+}
+.status-TERMINATED,
+.status-CANCELLED {
+  background: #f2f3f5;
+  color: #8a9099;
+}
+.title {
+  margin-top: 12rpx;
+  font-size: 31rpx;
+  font-weight: 600;
+  color: #1f2329;
+}
+.meta {
+  margin-top: 8rpx;
+  font-size: 25rpx;
+  color: #7b828c;
+}
+.bottom {
+  margin-top: 18rpx;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.amount {
+  font-size: 34rpx;
+  color: #e64340;
+  font-weight: 700;
+}
+.unit {
+  font-size: 22rpx;
+  font-weight: 400;
+  color: #9aa0a8;
+}
+.sign {
+  font-size: 24rpx;
+  color: #2b6de5;
+}
+.muted {
+  font-size: 23rpx;
+  color: #9aa0a8;
+}
+.loading {
+  text-align: center;
+  font-size: 24rpx;
+  color: #9aa0a8;
+  padding: 24rpx 0;
+}
+.footer-space {
+  height: 40rpx;
+}
+.retry {
+  background: #eef4ff;
+  color: #2b6de5;
+}

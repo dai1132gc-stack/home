@@ -1,0 +1,50 @@
+<!--pages/appointment/create/index.wxml-->
+<navigation-bar title="预约看房" back="{{true}}" color="black" background="#FFF"></navigation-bar>
+
+<scroll-view class="scroll" scroll-y type="list">
+  <view class="page">
+    <view wx:if="{{loading}}" class="state">加载中…</view>
+    <view wx:elif="{{error}}" class="state">
+      <text>{{error}}</text>
+      <button size="mini" class="retry" bindtap="goBack">返回</button>
+    </view>
+
+    <block wx:else>
+      <view class="panel">
+        <view class="house-title">{{house.title}}</view>
+        <view class="meta">{{house.region}} · {{house.community}}</view>
+        <view class="meta">{{house.address}}</view>
+      </view>
+
+      <view class="panel">
+        <view class="form-item">
+          <text class="label">看房日期</text>
+          <picker mode="date" value="{{date}}" start="{{minDate}}" end="{{maxDate}}" bindchange="onDateChange">
+            <view class="value">{{date}} ›</view>
+          </picker>
+        </view>
+        <view class="form-item">
+          <text class="label">看房时间</text>
+          <picker mode="time" value="{{time}}" start="08:00" end="20:00" bindchange="onTimeChange">
+            <view class="value">{{time}} ›</view>
+          </picker>
+        </view>
+        <view class="form-item">
+          <text class="label">联系电话</text>
+          <input class="input" type="number" maxlength="11" value="{{phone}}" placeholder="用于经纪人联系您" bindinput="onPhoneInput" />
+        </view>
+        <view class="form-item textarea-item">
+          <text class="label">备注</text>
+          <textarea class="textarea" maxlength="200" value="{{remark}}" placeholder="选填，如希望的看房方式" bindinput="onRemarkInput" />
+        </view>
+      </view>
+
+      <view class="tip">提交后由经纪人确认；确认后房源将为您保留，请按时到场。</view>
+
+      <view class="actions">
+        <button class="btn ghost" bindtap="goMyAppointments">我的预约</button>
+        <button class="btn primary" loading="{{submitting}}" bindtap="submit">提交预约</button>
+      </view>
+    </block>
+  </view>
+</scroll-view>

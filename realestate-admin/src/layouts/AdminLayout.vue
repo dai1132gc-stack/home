@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowDown, House, OfficeBuilding, User } from '@element-plus/icons-vue'
+import { ArrowDown, Calendar, Document, House, OfficeBuilding, User } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
 
@@ -34,6 +34,14 @@ async function handleLogout(): Promise<void> {
         <el-menu-item index="/owners">
           <el-icon><User /></el-icon>
           <span>客源管理</span>
+        </el-menu-item>
+        <el-menu-item index="/appointments">
+          <el-icon><Calendar /></el-icon>
+          <span>预约管理</span>
+        </el-menu-item>
+        <el-menu-item index="/contracts">
+          <el-icon><Document /></el-icon>
+          <span>合同管理</span>
         </el-menu-item>
       </el-menu>
     </el-aside>

@@ -25,6 +25,7 @@
     <mapstruct.version>1.6.3</mapstruct.version>
     <lombok.version>1.18.34</lombok.version>
     <lombok-binding.version>0.2.0</lombok-binding.version>
+    <pdfbox.version>3.0.3</pdfbox.version>
   </properties>
 
   <dependencies>
@@ -79,6 +80,20 @@
     <dependency>
       <groupId>org.flywaydb</groupId>
       <artifactId>flyway-mysql</artifactId>
+    </dependency>
+
+    <!-- 合同 PDF：中文字体由 resources/fonts 提供（Noto Sans SC, SIL OFL 1.1） -->
+    <dependency>
+      <groupId>org.apache.pdfbox</groupId>
+      <artifactId>pdfbox</artifactId>
+      <version>${pdfbox.version}</version>
+      <exclusions>
+        <!-- 统一使用 spring-jcl，避免 commons-logging 与 Spring 日志桥冲突 -->
+        <exclusion>
+          <groupId>commons-logging</groupId>
+          <artifactId>commons-logging</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <!-- Redis -->

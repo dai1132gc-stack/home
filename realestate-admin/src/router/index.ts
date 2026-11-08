@@ -67,6 +67,30 @@ const router = createRouter({
           component: () => import('@/views/owner/OwnerFormView.vue'),
           meta: { requiresAuth: true, roles: ['ADMIN'], title: '编辑房东/客源' },
         },
+        {
+          path: 'appointments',
+          name: 'appointment-list',
+          component: () => import('@/views/appointment/AppointmentListView.vue'),
+          meta: { requiresAuth: true, roles: ['ADMIN'], title: '预约管理' },
+        },
+        {
+          path: 'contracts',
+          name: 'contract-list',
+          component: () => import('@/views/contract/ContractListView.vue'),
+          meta: { requiresAuth: true, roles: ['ADMIN'], title: '合同管理' },
+        },
+        {
+          path: 'contracts/new',
+          name: 'contract-create',
+          component: () => import('@/views/contract/ContractFormView.vue'),
+          meta: { requiresAuth: true, roles: ['ADMIN'], title: '起草合同' },
+        },
+        {
+          path: 'contracts/:id',
+          name: 'contract-detail',
+          component: () => import('@/views/contract/ContractDetailView.vue'),
+          meta: { requiresAuth: true, roles: ['ADMIN'], title: '合同详情' },
+        },
       ],
     },
     {

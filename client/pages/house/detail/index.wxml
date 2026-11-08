@@ -58,6 +58,7 @@
       <button class="fav {{favorited ? 'on' : ''}}" loading="{{favoriting}}" bindtap="toggleFavorite">
         {{favorited ? '已收藏' : '收藏'}}
       </button>
+      <button class="book" bindtap="goAppointment">预约看房</button>
     </view>
   </block>
 </view>

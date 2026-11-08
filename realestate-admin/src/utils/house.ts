@@ -3,6 +3,8 @@ import type { HouseStatus, HouseType } from '@/types/house'
 const STATUS_LABEL: Record<HouseStatus, string> = {
   PENDING: '待发布',
   PUBLISHED: '已发布',
+  RESERVED: '已预定',
+  CONTRACTED: '已签约',
   OFFLINE: '已下架',
 }
 
@@ -11,7 +13,7 @@ const TYPE_LABEL: Record<HouseType, string> = {
   SALE: '出售',
 }
 
-export type TagType = 'success' | 'info' | 'warning' | 'danger'
+export type TagType = 'primary' | 'success' | 'info' | 'warning' | 'danger'
 
 export function statusLabel(status: string): string {
   return STATUS_LABEL[status as HouseStatus] ?? status
@@ -21,6 +23,10 @@ export function statusTagType(status: string): TagType {
   switch (status) {
     case 'PUBLISHED':
       return 'success'
+    case 'RESERVED':
+      return 'primary'
+    case 'CONTRACTED':
+      return 'danger'
     case 'PENDING':
       return 'warning'
     case 'OFFLINE':

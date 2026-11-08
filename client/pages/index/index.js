@@ -46,4 +46,20 @@ Page({
     const tab = (e && e.currentTarget && e.currentTarget.dataset.tab) || 'all'
     wx.navigateTo({ url: '/pages/house/list/index?tab=' + tab })
   },
+
+  goAppointments() {
+    if (!getAccessToken()) {
+      this.goLogin()
+      return
+    }
+    wx.navigateTo({ url: '/pages/appointment/list/index' })
+  },
+
+  goContracts() {
+    if (!getAccessToken()) {
+      this.goLogin()
+      return
+    }
+    wx.navigateTo({ url: '/pages/contract/list/index' })
+  },
 })

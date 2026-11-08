@@ -1,0 +1,97 @@
+/**pages/appointment/create/index.wxss**/
+page {
+  background: #f5f6f8;
+}
+.scroll {
+  height: 100vh;
+}
+.page {
+  padding: 20rpx 24rpx 60rpx;
+}
+.state {
+  padding-top: 200rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24rpx;
+  color: #8a9099;
+  font-size: 28rpx;
+}
+.panel {
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 28rpx;
+  margin-bottom: 20rpx;
+}
+.house-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1f2329;
+}
+.meta {
+  margin-top: 8rpx;
+  font-size: 25rpx;
+  color: #7b828c;
+}
+.form-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f2f3f5;
+}
+.form-item:last-child {
+  border-bottom: none;
+}
+.textarea-item {
+  align-items: flex-start;
+}
+.label {
+  font-size: 28rpx;
+  color: #4a515b;
+  min-width: 140rpx;
+}
+.value {
+  font-size: 28rpx;
+  color: #1f2329;
+}
+.input {
+  flex: 1;
+  text-align: right;
+  font-size: 28rpx;
+  color: #1f2329;
+}
+.textarea {
+  flex: 1;
+  height: 120rpx;
+  font-size: 27rpx;
+  color: #1f2329;
+  text-align: right;
+}
+.tip {
+  font-size: 23rpx;
+  color: #9aa0a8;
+  line-height: 1.6;
+  padding: 8rpx 8rpx 24rpx;
+}
+.actions {
+  display: flex;
+  gap: 20rpx;
+}
+.btn {
+  flex: 1;
+  border-radius: 44rpx;
+  font-size: 30rpx;
+}
+.btn.primary {
+  background: #2b6de5;
+  color: #fff;
+}
+.btn.ghost {
+  background: #eef4ff;
+  color: #2b6de5;
+}
+.retry {
+  background: #eef4ff;
+  color: #2b6de5;
+}

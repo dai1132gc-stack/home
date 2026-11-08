@@ -1,0 +1,84 @@
+<!--pages/contract/detail/index.wxml-->
+<navigation-bar title="合同详情" back="{{true}}" color="black" background="#FFF"></navigation-bar>
+
+<view class="page">
+  <view wx:if="{{loading}}" class="state">加载中…</view>
+  <view wx:elif="{{error}}" class="state">
+    <text>{{error}}</text>
+    <button size="mini" class="retry" bindtap="goBack">返回</button>
+  </view>
+
+  <block wx:else>
+    <scroll-view class="body" scroll-y type="list">
+      <view class="panel head">
+        <view class="no">{{contract.contractNo}}</view>
+        <view class="title">{{contract.title}}</view>
+        <view class="status status-{{contract.status}}">{{contract.statusLabel}}</view>
+      </view>
+
+      <view class="panel">
+        <view class="section-title">房屋信息</view>
+        <view class="line"><text class="label">房源</text><text class="value">{{contract.houseTitle}}</text></view>
+        <view class="line"><text class="label">地址</text><text class="value">{{contract.address}}</text></view>
+        <view class="line"><text class="label">户型</text><text class="value">{{contract.rooms}} 室 {{contract.bathrooms}} 卫 · {{contract.area}} ㎡</text></view>
+      </view>
+
+      <view class="panel">
+        <view class="section-title">租赁条款</view>
+        <view class="line"><text class="label">租金</text><text class="value price">{{amountText}}</text></view>
+        <view class="line"><text class="label">租金大写</text><text class="value">{{contract.amountInWords}}</text></view>
+        <view class="line"><text class="label">押金</text><text class="value">{{depositText}}</text></view>
+        <view class="line"><text class="label">付款方式</text><text class="value">{{contract.paymentCycleLabel}}</text></view>
+        <view class="line"><text class="label">租期</text><text class="value">{{periodText}}</text></view>
+        <view class="line"><text class="label">签署时间</text><text class="value">{{signedText}}</text></view>
+      </view>
+
+      <view class="panel">
+        <view class="section-title">签署方</view>
+        <view class="party" wx:for="{{contract.parties}}" wx:key="partyType">
+          <text class="party-role">{{item.partyTypeLabel}}</text>
+          <view class="party-info">
+            <view class="party-name">{{item.name}}</view>
+            <view class="party-meta">{{item.phone || '-'}}<text wx:if="{{item.idCardMasked}}"> · {{item.idCardMasked}}</text></view>
+          </view>
+        </view>
+      </view>
+
+      <view class="panel">
+        <view class="section-title">交易节点</view>
+        <view class="node" wx:for="{{contract.transactions}}" wx:key="node">
+          <view class="node-dot {{item.status}}"></view>
+          <view class="node-main">
+            <view class="node-title">{{item.nodeLabel}}</view>
+            <view class="node-meta">{{item.statusLabel}}<text wx:if="{{item.doneAt}}"> · {{item.doneAt}}</text></view>
+            <view class="node-meta" wx:if="{{item.remark}}">{{item.remark}}</view>
+          </view>
+        </view>
+      </view>
+
+      <view class="panel">
+        <view class="section-title">状态记录</view>
+        <view class="log" wx:for="{{logs}}" wx:key="id">
+          <view class="log-title">{{item.fromStatusLabel || '创建'}} → {{item.toStatusLabel}}</view>
+          <view class="log-meta">{{item.timeText}}<text wx:if="{{item.reason}}"> · {{item.reason}}</text></view>
+        </view>
+      </view>
+
+      <view class="tip">合同 PDF 由服务端生成并私有存储，仅本人可下载。</view>
+      <view class="footer-space"></view>
+    </scroll-view>
+
+    <view class="actions">
+      <button class="btn ghost" loading="{{acting}}" bindtap="download" disabled="{{!contract.pdfAvailable}}">
+        下载 PDF
+      </button>
+      <button
+        wx:if="{{contract.status === 'PENDING_SIGN'}}"
+        class="btn primary"
+        loading="{{acting}}"
+        bindtap="confirm"
+      >确认签署</button>
+      <button wx:else class="btn primary disabled" disabled>已{{contract.statusLabel}}</button>
+    </view>
+  </block>
+</view>
