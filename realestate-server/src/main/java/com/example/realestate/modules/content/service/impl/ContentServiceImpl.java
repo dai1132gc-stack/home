@@ -48,15 +48,18 @@ public class ContentServiceImpl implements ContentService {
     private final PolicyDocumentMapper policyMapper;
     private final PrivateStorageService privateStorage;
     private final CurrentUserProvider currentUser;
+    private final com.example.realestate.modules.ai.service.PolicyIndexService policyIndexService;
 
     public ContentServiceImpl(GuideArticleMapper guideMapper,
                               PolicyDocumentMapper policyMapper,
                               PrivateStorageService privateStorage,
-                              CurrentUserProvider currentUser) {
+                              CurrentUserProvider currentUser,
+                              com.example.realestate.modules.ai.service.PolicyIndexService policyIndexService) {
         this.guideMapper = guideMapper;
         this.policyMapper = policyMapper;
         this.privateStorage = privateStorage;
         this.currentUser = currentUser;
+        this.policyIndexService = policyIndexService;
     }
 
     // ---------- 教程 / 网签指引 / 公告 ----------
@@ -264,6 +267,8 @@ public class ContentServiceImpl implements ContentService {
             throw new BusinessException(ErrorCode.CONFLICT, "政策当前状态不允许发布");
         }
         log.info("政策发布 id={} operator={}", id, currentUser.currentUserIdOrNull());
+        // W6：发布提交后再做向量索引（afterCommit），索引失败不回滚发布
+        policyIndexService.indexAfterCommit(id);
         return toPolicyDetail(requirePolicy(id));
     }
 
@@ -275,6 +280,8 @@ public class ContentServiceImpl implements ContentService {
             throw new BusinessException(ErrorCode.CONFLICT, "仅已发布政策可以下架");
         }
         log.info("政策下架 id={} operator={}", id, currentUser.currentUserIdOrNull());
+        // W6：下架后移除分块，召回只面向已发布政策
+        policyIndexService.removeAfterCommit(id);
         return toPolicyDetail(requirePolicy(id));
     }
 
@@ -285,6 +292,8 @@ public class ContentServiceImpl implements ContentService {
         requireEditable(existing.getStatus(), "政策");
         policyMapper.deleteById(id);
         log.info("政策逻辑删除 id={} operator={}", id, currentUser.currentUserIdOrNull());
+        // W6：删除后移除分块
+        policyIndexService.removeAfterCommit(id);
     }
 
     @Override

@@ -33,6 +33,9 @@
         <if test="q.keyword != null and q.keyword != ''">
             AND (h.title LIKE CONCAT(#{q.keyword}, '%') OR h.community LIKE CONCAT(#{q.keyword}, '%'))
         </if>
+        <if test="q.rooms != null">
+            AND h.rooms = #{q.rooms}
+        </if>
     </sql>
 
     <select id="selectPageList" resultType="com.example.realestate.modules.house.model.vo.HouseListItemVO">

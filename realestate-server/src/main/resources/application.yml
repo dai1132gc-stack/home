@@ -65,6 +65,21 @@ app:
   contract:
     # W4 合同到期扫描（Asia/Shanghai），默认每日 01:10
     expiry-cron: ${CONTRACT_EXPIRY_CRON:0 10 1 * * *}
+  ai:
+    # W6 智能增强：enabled=false 时全部 AI 能力降级（选房走普通筛选，问答 503），无需任何凭据
+    enabled: ${AI_ENABLED:false}
+    base-url: ${AI_BASE_URL:}
+    api-key: ${AI_API_KEY:}
+    chat-model: ${AI_CHAT_MODEL:}
+    embedding-model: ${AI_EMBEDDING_MODEL:}
+    timeout-ms: ${AI_TIMEOUT_MS:12000}
+    max-input-chars: ${AI_MAX_INPUT_CHARS:200}
+    max-output-tokens: ${AI_MAX_OUTPUT_TOKENS:800}
+    daily-token-limit: ${AI_DAILY_TOKEN_LIMIT:100000}
+    rate-limit-per-minute: ${AI_RATE_LIMIT_PER_MINUTE:20}
+    top-k: ${AI_TOP_K:4}
+    similarity-threshold: ${AI_SIMILARITY_THRESHOLD:0.30}
+    concurrency: ${AI_CONCURRENCY:4}
 
 management:
   endpoints:

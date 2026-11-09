@@ -14,6 +14,7 @@ import {
   updatePolicy,
   uploadPolicyAttachment,
 } from '@/api/content'
+import { reindexPolicy } from '@/api/ai'
 import type { ContentQueryParams, PolicyListItem, PolicyType } from '@/types/content'
 import { CONTENT_STATUS_OPTIONS, POLICY_TYPE_OPTIONS, contentStatusTagType } from '@/types/content'
 import { formatDate, formatDateTime, saveBlob } from '@/utils/format'
@@ -206,6 +207,21 @@ async function offline(row: PolicyListItem): Promise<void> {
   }
 }
 
+const reindexingId = ref<number | null>(null)
+
+/** W6：重建单条政策向量索引（幂等），发布后自动索引失败时手工补偿 */
+async function reindex(row: PolicyListItem): Promise<void> {
+  reindexingId.value = row.id
+  try {
+    const result = await reindexPolicy(row.id)
+    ElMessage.success(`索引已重建：${result.chunks} 个分块`)
+  } catch (error) {
+    ElMessage.error(errorMessage(error, '索引重建失败'))
+  } finally {
+    reindexingId.value = null
+  }
+}
+
 async function remove(row: PolicyListItem): Promise<void> {
   try {
     await ElMessageBox.confirm(`确认删除「${row.title}」？该操作只做逻辑删除。`, '删除确认', { type: 'warning' })
@@ -290,12 +306,18 @@ onMounted(load)
         <el-table-column label="更新时间" width="165">
           <template #default="{ row }">{{ formatDateTime(row.updatedAt) }}</template>
         </el-table-column>
-        <el-table-column label="操作" width="220" fixed="right">
+        <el-table-column label="操作" width="280" fixed="right">
           <template #default="{ row }">
             <el-button v-if="editable(row)" link type="primary" @click="openEdit(row)">编辑</el-button>
             <el-button v-if="editable(row)" link type="success" @click="publish(row)">发布</el-button>
             <el-button v-if="row.status === 'PUBLISHED'" link type="warning" @click="offline(row)">下架</el-button>
             <el-button v-if="editable(row)" link type="danger" @click="remove(row)">删除</el-button>
+            <el-button
+              link
+              type="info"
+              :loading="reindexingId === row.id"
+              @click="reindex(row)"
+            >重建索引</el-button>
           </template>
         </el-table-column>
       </el-table>

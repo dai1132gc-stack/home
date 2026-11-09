@@ -69,6 +69,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/policies", "/api/v1/policies/*").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/calculators/mortgage", "/api/v1/calculators/tax").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/calculators/config").permitAll()
+                        // W6 公开 AI 接口：精确到方法+路径，/api/v1/admin/** 不放行（走认证+@PreAuthorize）
+                        .requestMatchers(HttpMethod.POST, "/api/v1/ai/house-search", "/api/v1/ai/policy-answer").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/ai/status").permitAll()
                         .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
                         .requestMatchers("/actuator/health/**").permitAll();
                     // V6.0.1 F6：API 文档仅非 prod 放行；prod 由 springdoc 关闭 + Security 不放行双保险

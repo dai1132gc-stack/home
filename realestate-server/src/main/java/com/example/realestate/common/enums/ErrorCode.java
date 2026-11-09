@@ -29,7 +29,12 @@ public enum ErrorCode {
 
     // 文件
     FILE_INVALID("FILE_40001", 400, "文件类型或内容不合法"),
-    FILE_TOO_LARGE("FILE_41301", 413, "文件大小超出限制");
+    FILE_TOO_LARGE("FILE_41301", 413, "文件大小超出限制"),
+
+    // AI 智能服务（W6）
+    AI_UPSTREAM_ERROR("AI_50201", 502, "智能服务暂时不可用，请稍后重试"),
+    AI_NOT_CONFIGURED("AI_50301", 503, "智能服务未配置，暂不可用"),
+    AI_LIMITER_UNAVAILABLE("AI_50302", 503, "智能服务限流组件不可用，请稍后重试");
 
     private final String code;
     private final int httpStatus;

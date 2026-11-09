@@ -12,6 +12,8 @@
       <button class="entry" data-category="NOTICE" bindtap="goGuides">公告</button>
       <button class="entry" bindtap="goPolicies">政策文件</button>
       <button class="entry" bindtap="goCalculator">房贷计算</button>
+      <button class="entry" bindtap="goAiSearch">智能找房</button>
+      <button class="entry" bindtap="goAiQa">政策问答</button>
     </view>
 
     <view wx:if="{{loading}}" class="status">正在恢复会话…</view>

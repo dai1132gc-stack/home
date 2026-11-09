@@ -2,14 +2,15 @@
 
 ## 当前状态
 
-- 当前技术方案版本：**V6.0.1**（W5 小程序联调已完成并通过端到端验收；V6.0.1 完成 W1～W5 审查修复 F1～F8，见方案 25.9 与 `docs/review-w1-w5.md`；W1 见方案第 21 节，W2 第 22 节，W3 第 23 节，W4 第 24 节，W5 第 25 节）。
+- 当前技术方案版本：**V7.0**（W6 智能增强已完成并通过验收，见方案第 26 节；W1 见方案第 21 节，W2 第 22 节，W3 第 23 节，W4 第 24 节，W5 第 25 节，V6.0.1 审查修复 F1～F8 见 25.9）。
 - 完整方案：[`技术方案.md`](../技术方案.md)。
 - W1 已交付三端工程：后端 `realestate-server`（Spring Boot 3.5.6 + JWT + Redis 会话）、Web `realestate-admin`（Vue 3 + TS）、小程序 `client`（原生，增量新增认证模块）。
 - W2 在此基础上新增：房源 CRUD 与状态机、条件筛选与排序（下推 SQL）、图片上传与媒体关联、房东/客源管理、客户收藏、数据权限隔离；Web 新增房源/客源页面，小程序新增房源列表/详情/收藏。
 - W3 新增：预约带看（客户提交、ADMIN 确认/取消/完成/爽约、客户取消）、合同（起草→待签→客户确认生效→终止，含房源/双方/条款快照）、交易节点（定金/签约/交房 + 状态日志）、中文合同 PDF（字体嵌入、金额大写、长地址换行、表格跨页、私有存储 + 鉴权下载）、房源状态扩展 `RESERVED/CONTRACTED` 并与预约/合同联动；Web 新增预约/合同页面，小程序新增预约看房/我的预约/我的合同。
 - W4 新增：报修工单（客户提交、ADMIN 受理/处理/解决、客户关闭/撤销/重开、状态时间线、私有图片鉴权预览）、内容政策（教程/网签指引/公告、政策文档、草稿/发布/下架、纯文本正文、政策 PDF 附件）、房贷与税费测算（商贷/公积金、等额本息/本金、税费分档、公开限流、配置来源与免责声明）、客源跟进（复用 V2 `customer_follow`）、合同到期定时任务（Redis 锁、幂等、释放房源）；Web 新增报修/内容/跟进/测算页面，小程序新增报修/内容/测算页面。
 - W5 新增：微信小程序 code 登录（`POST /auth/wechat-login` + `user_wechat_binding`，Flyway V5；未配置 AppID/AppSecret 返回 503 并降级账号密码，不信任客户端 openid、不保存 session_key）；小程序登录页微信一键登录与账号密码降级、401 单飞刷新、上传/下载显式 Bearer 与刷新重试、GET 重试/写请求不重试、私有图片预览、列表分页与错误重试、个人中心登录态修复；输出真机与合法域名清单。真实微信授权与真机扫码仍待正式凭据后由用户验证。
-- `home/client` 是用户已创建的原生微信小程序工程，W1～W4 均保留并增量修改，未迁移 uni-app。
+- W6 新增：自然语言选房（`POST /ai/house-search`，模型仅输出受约束 JSON 意图，白名单映射 `HouseQuery` 含新增 rooms 参数化条件，AI 关闭/超时/429/5xx/非法 JSON 时 200 + degraded 降级为最新发布列表）；政策向量问答（`POST /ai/policy-answer`，发布后 afterCommit 分块+embedding 索引，Top-K=4/阈值 0.30，引用含标题/文号/来源/原文定位，检索不足 `insufficient=true` 拒答不调用 chat）；ADMIN 单条/全量重建索引与 `/admin/ai/metrics` 统计（成功率/P95/场景分组/最近 20 条不含内容）、公开 `/ai/status`；AI 公开接口每 IP 20 次/分 + 日 token 预算 + 并发 4，Redis 故障 fail-closed（503 `AI_50302`）；新增 Flyway V6（`policy_document_chunk` 增列 + `ai_interaction_log`）；Web 新增「智能服务」页与政策「重建索引」按钮，小程序新增智能找房/政策问答页（游客可用）。AI 默认关闭（`AI_ENABLED=false`），真实 Provider 未提供 Key，真实模型未验证（stub 联调见 `docs/w6-ai-checklist.md`）。
+- `home/client` 是用户已创建的原生微信小程序工程，W1～W6 均保留并增量修改，未迁移 uni-app。
 - 下文启动命令已随工程落地生效。
 - 所有项目源码、启动说明和项目内文档统一放在 `D:/graduate/home/`；总体技术方案保留在 `D:/graduate/技术方案.md`。
 
@@ -115,7 +116,7 @@ cp /d/graduate/home/client/config/env.example.js /d/graduate/home/client/config/
 | 文件阶段 | 公开媒体目录 `STORAGE_LOCAL_ROOT`（默认 `uploads`）；合同 PDF 私有目录 `STORAGE_PRIVATE_ROOT`（默认 `uploads-private`，不注册静态映射）；生产再配置 OSS |
 | 微信登录（W5） | 后端 `WECHAT_MINI_APP_ID`、`WECHAT_MINI_APP_SECRET`、`WECHAT_MINI_TIMEOUT_SECONDS`（默认 4）；未配置时微信登录返回 503，账号密码登录不受影响 |
 | Cookie（V6.0.1） | 后端 `APP_COOKIE_SECURE`：dev=false（http://localhost 可登录），prod 必须 true（仅 HTTPS 发送 Refresh Cookie）；Refresh Cookie 固定 HttpOnly + SameSite=Lax + Path=/api/v1/auth，前提是 Web 与 API 同站部署，跨站需另行评估 None+Secure |
-| AI 阶段 | 后端 AI Base URL、模型、API Key、超时与限额 |
+| AI 阶段（W6） | 后端 `AI_ENABLED`（默认 false，关闭时选房自动降级、问答 503）、`AI_BASE_URL`/`AI_API_KEY`/`AI_CHAT_MODEL`/`AI_EMBEDDING_MODEL`（OpenAI 兼容，enabled=true 时必填否则启动 fail-fast）、`AI_TIMEOUT_MS`（10000~15000，默认 12000）、`AI_MAX_INPUT_CHARS`（≤200）、`AI_MAX_OUTPUT_TOKENS`、`AI_DAILY_TOKEN_LIMIT`、`AI_RATE_LIMIT_PER_MINUTE`（默认 20）、`AI_TOP_K`（默认 4）、`AI_SIMILARITY_THRESHOLD`（默认 0.30）、`AI_CONCURRENCY`（默认 4）；Key 只允许放 `.env`，详见 `docs/w6-ai-checklist.md` |
 
 注意：
 
@@ -295,7 +296,19 @@ node docs/mini-w5-flow.mjs          # W5 微信未配置降级/模拟成功、�
 # 4) V6.0.1 认证加固（18 项）：F1 并发 200/401 + 胜者新 token 失效、F2 Cookie 属性、
 #    F4 IP 第 11 次 429 + 成功登录不误伤
 bash docs/smoke-auth-hardening.sh
+
+# 5) W6 智能增强（smoke-w6 自动识别 AI_ENABLED 两种模式）
+bash docs/smoke-w6.sh              # 未配置模式（18 项）：选房 AI_DISABLED 降级、问答 503、限流 429
+node docs/ai-stub.mjs              # 另开终端：OpenAI 兼容 stub :8090（仅 dev/test）
+# 以 stub 模式重启后端后：
+#   AI_ENABLED=true AI_BASE_URL=http://127.0.0.1:8090/v1 AI_API_KEY=stub-key \
+#   AI_CHAT_MODEL=stub-chat AI_EMBEDDING_MODEL=stub-embed mvn spring-boot:run
+bash docs/smoke-w6.sh              # stub 模式（29 项）：意图解析/发布自动索引/问答引用/拒答/重建/metrics
+node docs/mini-w6-flow.mjs         # 小程序智能找房/政策问答（25 项）
+node docs/web-w6-flow.mjs docs     # Web 智能服务页与政策重建索引按钮（需 Chrome 9222）
 ```
+
+W6 真实 Provider 未提供 Key，**真实模型未验证**；上述 stub 结果不代表真实模型联调通过。配置与验收边界见 `docs/w6-ai-checklist.md`。
 
 W5 真机与合法域名项无法自动化，清单与验收边界见 `docs/w5-device-checklist.md`；真实微信授权、jscode2session 与扫码项标注“待用户验证”，不得表述为真机通过。
 
@@ -365,8 +378,8 @@ W5 真机与合法域名项无法自动化，清单与验收边界见 `docs/w5-d
 | W3 交易与合同 | V4.0 |
 | W4 租后服务与工具 | **V5.0** |
 | W5 小程序联调 | **V6.0** |
-| W1～W5 审查修复（F1～F8） | **V6.0.1（当前）** |
-| W6 智能增强 | V7.0 |
+| W1～W5 审查修复（F1～F8） | V6.0.1 |
+| W6 智能增强 | **V7.0（当前）** |
 | W7 测试与优化 | V8.0 |
 | W8 部署与论文材料 | V9.0 |
 

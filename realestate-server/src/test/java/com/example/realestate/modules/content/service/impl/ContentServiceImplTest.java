@@ -45,12 +45,14 @@ class ContentServiceImplTest {
     private PrivateStorageService privateStorage;
     @Mock
     private CurrentUserProvider currentUser;
+    @Mock
+    private com.example.realestate.modules.ai.service.PolicyIndexService policyIndexService;
 
     private ContentServiceImpl service;
 
     @BeforeEach
     void setUp() {
-        service = new ContentServiceImpl(guideMapper, policyMapper, privateStorage, currentUser);
+        service = new ContentServiceImpl(guideMapper, policyMapper, privateStorage, currentUser, policyIndexService);
     }
 
     private GuideArticle guide(Long id, String status) {

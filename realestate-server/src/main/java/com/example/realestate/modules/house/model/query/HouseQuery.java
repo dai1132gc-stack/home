@@ -29,6 +29,9 @@ public class HouseQuery extends PageQuery {
     /** 标题或小区前缀匹配（命中索引，避免全表 LIKE %x%） */
     private String keyword;
 
+    /** 居室数（W6 智能选房增量条件，参数化下推 SQL） */
+    private Integer rooms;
+
     private String sort;
 
     public String getStatus() {
@@ -93,6 +96,14 @@ public class HouseQuery extends PageQuery {
 
     public void setKeyword(String keyword) {
         this.keyword = keyword;
+    }
+
+    public Integer getRooms() {
+        return rooms;
+    }
+
+    public void setRooms(Integer rooms) {
+        this.rooms = rooms;
     }
 
     public String getSort() {

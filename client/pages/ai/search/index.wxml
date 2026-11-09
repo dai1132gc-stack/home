@@ -1,0 +1,29 @@
+<view class="page">
+  <view class="search-bar">
+    <input class="input" maxlength="200" placeholder="如：朝阳三室一厅 5000 以内"
+      value="{{query}}" bindinput="onInput" confirm-type="search" bindconfirm="submit" />
+    <button class="btn" disabled="{{loading}}" bindtap="submit">{{loading ? '搜索中' : '智能找房'}}</button>
+  </view>
+
+  <view wx:if="{{degraded}}" class="degrade-tip">{{degradeText}}</view>
+  <view wx:if="{{conditions.length}}" class="chips">
+    <text wx:for="{{conditions}}" wx:key="key" class="chip">{{item.text}}</text>
+  </view>
+  <view wx:if="{{error}}" class="error">
+    <text>{{error}}</text>
+    <button size="mini" bindtap="retry">重试</button>
+  </view>
+
+  <view wx:if="{{items.length}}" class="list">
+    <view wx:for="{{items}}" wx:key="id" class="card" data-id="{{item.id}}" bindtap="goDetail">
+      <image wx:if="{{item.cover}}" class="cover" src="{{item.cover}}" mode="aspectFill" />
+      <view class="info">
+        <view class="title">{{item.title}}</view>
+        <view class="meta">{{item.layoutText}} · {{item.areaText}} · {{item.community || item.region || ''}}</view>
+        <view class="price">{{item.priceText}} <text class="type">{{item.typeText}}</text></view>
+      </view>
+    </view>
+    <view class="foot">{{loading ? '加载中…' : (finished ? '没有更多了' : '上拉加载更多')}}</view>
+  </view>
+  <view wx:elif="{{searched && !loading && !error}}" class="empty">未找到匹配房源，换个描述试试</view>
+</view>

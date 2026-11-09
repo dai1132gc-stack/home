@@ -14,7 +14,9 @@
     "pages/repair/detail/index",
     "pages/content/list/index",
     "pages/content/detail/index",
-    "pages/calculator/index"
+    "pages/calculator/index",
+    "pages/ai/search/index",
+    "pages/ai/qa/index"
   ],
   "window": {
     "navigationBarTextStyle": "black",

@@ -1,0 +1,25 @@
+<view class="page">
+  <view class="ask-bar">
+    <textarea class="input" maxlength="200" auto-height placeholder="如：首套房契税税率是多少？"
+      value="{{question}}" bindinput="onInput" />
+    <button class="btn" disabled="{{loading}}" bindtap="submit">{{loading ? '提问中' : '提问'}}</button>
+  </view>
+
+  <view wx:if="{{error}}" class="error">{{error}}</view>
+
+  <view wx:if="{{asked && !error}}" class="result">
+    <view wx:if="{{insufficient}}" class="insufficient">现有政策资料不足以回答该问题，可尝试查看政策列表或换个问法。</view>
+    <block wx:else>
+      <text class="answer">{{answer}}</text>
+      <view wx:if="{{citations.length}}" class="citations">
+        <view class="cite-title">参考政策</view>
+        <view wx:for="{{citations}}" wx:key="chunkIndex" class="cite" data-id="{{item.policyId}}" bindtap="goPolicy">
+          <view class="cite-head">《{{item.title}}》{{item.docNo ? '（' + item.docNo + '）' : ''}}</view>
+          <view class="cite-source">来源：{{item.source || '-'}} · 第 {{item.chunkIndex + 1}} 段</view>
+          <view class="cite-snippet">{{item.snippet}}</view>
+        </view>
+      </view>
+    </block>
+    <view wx:if="{{disclaimer}}" class="disclaimer">{{disclaimer}}</view>
+  </view>
+</view>

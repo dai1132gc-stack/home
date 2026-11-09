@@ -84,4 +84,13 @@ Page({
   goCalculator() {
     wx.navigateTo({ url: '/pages/calculator/index' })
   },
+
+  /** W6 智能服务：公开接口，游客可用 */
+  goAiSearch() {
+    wx.navigateTo({ url: '/pages/ai/search/index' })
+  },
+
+  goAiQa() {
+    wx.navigateTo({ url: '/pages/ai/qa/index' })
+  },
 })

@@ -121,6 +121,12 @@ const router = createRouter({
           component: () => import('@/views/calculator/CalculatorView.vue'),
           meta: { requiresAuth: true, roles: ['ADMIN'], title: '测算工具' },
         },
+        {
+          path: 'ai',
+          name: 'ai-service',
+          component: () => import('@/views/ai/AiServiceView.vue'),
+          meta: { requiresAuth: true, roles: ['ADMIN'], title: '智能服务' },
+        },
       ],
     },
     {
